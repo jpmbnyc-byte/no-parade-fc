@@ -9,6 +9,25 @@ centering) is ported from Bayonne Athletics' `src/components/ProductCanvas.tsx`
 and `src/lib/kit.ts` — same technique, extended with the crest badge,
 motto, and heritage-line layers this configurator needs.
 
+## Branding
+
+`public/logo.png` and `public/logo-white.png` are the real No Parade
+F.C. logo (trimmed, `logo-white.png` recolored for dark backgrounds —
+regenerate it from `logo.png` if the source art changes rather than
+hand-editing it). Used in the nav, footer, both order pages, and
+`public/favicon.png` (cropped to just the chevron mark). `public/og.jpg`
+is a built social-share card (logo + headline + France Edition photo) —
+`index.html`'s `og:image`/`twitter:image` point at it via the
+`npfc.noparade-store.com` domain from the deploy plan below, which
+isn't live yet; the tags will just work once DNS is.
+
+Every nav item, footer link, and hero CTA is wired to something real:
+`Home` scrolls to top, `NPFC`/`PBWY`/`Explore NPFC` scroll to the "This
+is not merch" section, `Build Your Crest™`/`Collections`/the hero's
+primary CTA scroll to the configurator. There's no multi-page routing
+here (yet) — everything lives on the one page, so these are anchors,
+not separate destinations.
+
 ## Stack
 
 Plain Vite + React + TypeScript + Tailwind v4 — no framework beyond

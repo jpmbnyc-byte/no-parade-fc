@@ -1,20 +1,32 @@
 type Props = {
-  onStart: () => void;
+  onHome: () => void;
+  onAbout: () => void;
+  onBuild: () => void;
 };
 
-export function Hero({ onStart }: Props) {
+export function Hero({ onHome, onAbout, onBuild }: Props) {
   return (
     <section className="border-b border-[var(--panel-line)]">
       <nav className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-5 sm:px-10">
-        <span className="font-serif text-lg font-bold tracking-[0.08em]" style={{ fontFamily: "var(--font-display)" }}>
-          NP+FC
-        </span>
+        <button onClick={onHome} className="flex items-center">
+          <img src="/logo-white.png" alt="No Parade F.C." className="h-6 w-auto sm:h-7" />
+        </button>
         <div className="hidden gap-8 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)] sm:flex">
-          <span>Home</span>
-          <span>NPFC</span>
-          <span className="text-[var(--gold)]">Build Your Crest™</span>
-          <span>PBWY</span>
-          <span>Collections</span>
+          <button onClick={onHome} className="transition-colors hover:text-[var(--cream)]">
+            Home
+          </button>
+          <button onClick={onAbout} className="transition-colors hover:text-[var(--cream)]">
+            NPFC
+          </button>
+          <button onClick={onBuild} className="text-[var(--gold)] transition-colors hover:text-[var(--cream)]">
+            Build Your Crest™
+          </button>
+          <button onClick={onAbout} className="transition-colors hover:text-[var(--cream)]">
+            PBWY
+          </button>
+          <button onClick={onBuild} className="transition-colors hover:text-[var(--cream)]">
+            Collections
+          </button>
         </div>
       </nav>
 
@@ -37,12 +49,15 @@ export function Hero({ onStart }: Props) {
           </p>
           <div className="mt-9 flex flex-wrap gap-4">
             <button
-              onClick={onStart}
+              onClick={onBuild}
               className="bg-[var(--gold)] px-7 py-3.5 text-xs font-bold uppercase tracking-[0.14em] text-[var(--ink)] transition-opacity hover:opacity-90"
             >
               Start with France Edition →
             </button>
-            <button className="border border-[var(--panel-line)] px-7 py-3.5 text-xs font-bold uppercase tracking-[0.14em] transition-colors hover:border-[var(--gold)]">
+            <button
+              onClick={onAbout}
+              className="border border-[var(--panel-line)] px-7 py-3.5 text-xs font-bold uppercase tracking-[0.14em] transition-colors hover:border-[var(--gold)]"
+            >
               Explore NPFC
             </button>
           </div>
