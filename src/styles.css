@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #0a0d13;
+  --panel: #12161e;
+  --panel-line: rgba(245, 240, 230, 0.12);
+  --cream: #f4efe4;
+  --muted: rgba(244, 239, 228, 0.55);
+  --gold: #c9a961;
+  --gold-dim: rgba(201, 169, 97, 0.35);
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-body: "Manrope", "Helvetica Neue", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--cream);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--gold);
+  color: var(--ink);
+}

@@ -1,0 +1,234 @@
+import { useState } from "react";
+import { CREST_LAYOUT, type CrestId } from "@/lib/kit";
+import { useInkBias } from "@/lib/useInkBias";
+import { CrestBadge } from "@/components/CrestBadge";
+
+export type CanvasView = "front" | "back";
+
+type Props = {
+  view: CanvasView;
+  frontSrc: string;
+  /** No real blank back plate exists yet — null renders an honest placeholder instead of a fake photo. */
+  backSrc: string | null;
+  name: string;
+  number: string;
+  year: string;
+  motto: string;
+  heritage: string;
+  crestId: CrestId | null;
+  fontFamily?: string;
+};
+
+/**
+ * Live overlay preview — ported from Bayonne Athletics' ProductCanvas.tsx
+ * (percentage-of-plate lettering, canvas ink-bias centering) and extended
+ * with the crest badge, motto, and heritage-line layers Build Your Crest
+ * needs. Positions in src/lib/kit.ts's CREST_LAYOUT are PLACEHOLDER —
+ * tuned against the finished reference mock, not a real blank plate.
+ * Swap frontSrc/backSrc for real blank photography and re-tune once
+ * that's available; nothing else here needs to change.
+ */
+export function CrestCanvas({
+  view,
+  frontSrc,
+  backSrc,
+  name,
+  number,
+  year,
+  motto,
+  heritage,
+  crestId,
+  fontFamily = "'Manrope', sans-serif",
+}: Props) {
+  const [plate, setPlate] = useState<{ w: number; h: number } | null>(null);
+  const layout = CREST_LAYOUT;
+
+  const nameChars = Math.max(name.replace(/\s/g, "").length, 1);
+  const nameTracking = nameChars >= 10 ? 0.01 : nameChars >= 7 ? 0.035 : 0.06;
+  const nameFit = Math.min(1, 8 / nameChars);
+  const nameBias = useInkBias(name || "A", fontFamily, nameTracking);
+  const numberBias = useInkBias(number || "8", fontFamily, 0) + (number.length === 1 ? 0.03 : 0);
+
+  const showBack = view === "back";
+  const showFront = view === "front";
+
+  const textStyle = {
+    color: "var(--cream)",
+    WebkitTextStroke: "0.04em rgba(10,13,19,0.85)",
+    paintOrder: "stroke fill" as const,
+  };
+
+  if (showBack && !backSrc) {
+    return (
+      <figure className="relative flex aspect-[4/5] w-full flex-col items-center justify-center gap-3 overflow-hidden rounded-sm border border-dashed border-[var(--panel-line)] bg-[var(--panel)] px-8 text-center">
+        <div className="pointer-events-none absolute inset-0" aria-hidden>
+          {name ? (
+            <p className="absolute left-1/2 top-[16%] w-[70%] -translate-x-1/2 text-center text-4xl font-bold uppercase text-[var(--muted)]">
+              {name}
+            </p>
+          ) : null}
+          {number ? (
+            <p className="absolute left-1/2 top-[26%] -translate-x-1/2 text-center text-8xl font-bold text-[var(--muted)]">
+              {number}
+            </p>
+          ) : null}
+        </div>
+        <p className="relative text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
+          Back view — pending blank plate photography
+        </p>
+      </figure>
+    );
+  }
+
+  const src = showFront ? frontSrc : (backSrc as string);
+
+  return (
+    <figure
+      className="relative aspect-[4/5] w-full overflow-hidden rounded-sm bg-[var(--panel)]"
+      style={{ containerType: "size" }}
+    >
+      <img
+        key={src}
+        src={src}
+        alt={`No Parade F.C. jersey, ${view} view`}
+        className="absolute inset-0 h-full w-full object-contain object-center"
+        draggable={false}
+        onLoad={(e) => {
+          const el = e.currentTarget;
+          setPlate({ w: el.naturalWidth, h: el.naturalHeight });
+        }}
+      />
+
+      <div className="pointer-events-none absolute inset-0" aria-hidden={!plate}>
+        {showBack && name ? (
+          <p
+            className="absolute flex items-end justify-center whitespace-nowrap text-center uppercase"
+            style={{
+              top: `${layout.name.y}%`,
+              left: `${layout.centerX}%`,
+              transform: `translateX(calc(-50% - ${nameBias}em)) scale(${nameFit})`,
+              transformOrigin: "center bottom",
+              width: `${layout.name.maxWidthPct}%`,
+              height: `${layout.name.heightPct}%`,
+              fontFamily,
+              fontWeight: 700,
+              fontSize: `calc(${layout.name.heightPct} * 1cqh)`,
+              letterSpacing: `${nameTracking}em`,
+              lineHeight: 0.9,
+              overflow: "visible",
+              ...textStyle,
+            }}
+          >
+            {name}
+          </p>
+        ) : null}
+
+        {showBack && number ? (
+          <p
+            className="absolute flex items-start justify-center whitespace-nowrap text-center"
+            style={{
+              top: `${layout.number.y}%`,
+              left: `${layout.centerX}%`,
+              transform: `translateX(calc(-50% - ${numberBias}em))`,
+              transformOrigin: "center top",
+              width: "max-content",
+              maxWidth: `${layout.number.maxWidthPct}%`,
+              height: `${layout.number.heightPct}%`,
+              fontFamily,
+              fontWeight: 700,
+              fontSize: `calc(${layout.number.heightPct} * 1cqh)`,
+              lineHeight: 0.85,
+              overflow: "visible",
+              ...textStyle,
+            }}
+          >
+            {number}
+          </p>
+        ) : null}
+
+        {showFront && number ? (
+          <p
+            className="absolute flex items-start justify-center whitespace-nowrap text-center"
+            style={{
+              top: `${layout.numberFront.y}%`,
+              left: `${layout.centerX}%`,
+              transform: `translateX(calc(-50% - ${numberBias}em))`,
+              width: "max-content",
+              maxWidth: `${layout.numberFront.maxWidthPct}%`,
+              height: `${layout.numberFront.heightPct}%`,
+              fontFamily,
+              fontWeight: 700,
+              fontSize: `calc(${layout.numberFront.heightPct} * 1cqh)`,
+              overflow: "visible",
+              ...textStyle,
+            }}
+          >
+            {number}
+          </p>
+        ) : null}
+
+        {showBack && year ? (
+          <p
+            className="absolute text-center uppercase tracking-[0.3em]"
+            style={{
+              top: `${layout.year.y}%`,
+              left: `${layout.centerX}%`,
+              transform: "translateX(-50%)",
+              fontFamily,
+              fontSize: `calc(${layout.year.heightPct} * 1cqh)`,
+              color: "var(--gold)",
+            }}
+          >
+            {year}
+          </p>
+        ) : null}
+
+        {showBack && motto ? (
+          <p
+            className="absolute w-[70%] text-center uppercase tracking-[0.18em]"
+            style={{
+              top: `${layout.motto.y}%`,
+              left: `${layout.centerX}%`,
+              transform: "translateX(-50%)",
+              fontFamily,
+              fontWeight: 600,
+              fontSize: `calc(${layout.motto.heightPct} * 1cqh)`,
+              color: "var(--cream)",
+            }}
+          >
+            {motto}
+          </p>
+        ) : null}
+
+        {showBack && heritage ? (
+          <p
+            className="absolute w-[70%] text-center uppercase tracking-[0.14em]"
+            style={{
+              top: `${layout.heritage.y}%`,
+              left: `${layout.centerX}%`,
+              transform: "translateX(-50%)",
+              fontFamily,
+              fontSize: `calc(${layout.heritage.heightPct} * 1cqh)`,
+              color: "var(--muted)",
+            }}
+          >
+            {heritage}
+          </p>
+        ) : null}
+
+        {showFront && crestId ? (
+          <div
+            className="absolute"
+            style={{
+              top: `${layout.crestBadge.y}%`,
+              left: `${layout.crestBadge.x}%`,
+              width: `${layout.crestBadge.widthPct}%`,
+            }}
+          >
+            <CrestBadge id={crestId} className="w-full text-[var(--gold)]" />
+          </div>
+        ) : null}
+      </div>
+    </figure>
+  );
+}
