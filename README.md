@@ -55,12 +55,22 @@ needs to change:
 - **Back plate — real photo now in use.** `public/france-back.jpg` is
   the actual France Edition back print (no name/number baked in), not
   a placeholder — `CrestCanvas.tsx`'s `!backSrc` fallback only fires
-  when a nation has no back photo at all (still true for Jamaica/Haiti/
-  USA). `public/haiti-back.jpg` is saved for when the Haiti nation
-  unlocks, but nothing wires it up yet. Both source images have a
-  visible checker pattern instead of real transparency (they're flat
-  RGB, not RGBA) — harmless behind the dark preview panel, but worth
-  a real cutout/transparent export if that bothers anyone visually.
+  when a nation has no back photo at all (still true for Jamaica/USA).
+  Both source images have a visible checker pattern instead of real
+  transparency (flat RGB, not RGBA) — harmless behind the dark preview
+  panel, but worth a real cutout/transparent export if that bothers
+  anyone visually.
+- **Haiti Home — assets saved, not wired up yet.** `public/haiti-back.jpg`
+  (product-style back, confirmed the matching pair) and
+  `public/haiti-front-lifestyle.jpg` (a lifestyle/environmental shot,
+  not a flat product photo) are both real Haiti Home photography. The
+  Haiti entry in `NATIONS` (`src/lib/kit.ts`) is still `unlocked: false`
+  and `Configurator.tsx` still hardcodes the France assets, so neither
+  file is live anywhere yet. Before flipping Haiti on: the lifestyle
+  front photo isn't cropped to the garment the way France's front is,
+  so name/number/crest overlay positions would need re-tuning against
+  it specifically (or swap in a flatter product-style front photo if
+  one exists, to match France's treatment).
 - **Real crest artwork.** The 5 crest badges (Peace, Heritage, Grace,
   Club, Family) in `src/components/CrestBadge.tsx` are original
   placeholder line-art capturing each crest's theme, not the licensed
