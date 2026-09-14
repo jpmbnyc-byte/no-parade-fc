@@ -151,10 +151,9 @@ export function validateBuild(input: {
     if (!/^\d{1,2}$/.test(input.number)) {
       issues.push({ field: "number", message: "0–99 only." });
     } else {
+      // No Parade F.C. prints zero-padded numbers (e.g. "07"), unlike
+      // Bayonne Athletics — don't reject a leading zero here.
       const n = Number(input.number);
-      if (input.number.length > 1 && input.number.startsWith("0")) {
-        issues.push({ field: "number", message: "No leading zero except 0." });
-      }
       if (n < NUMBER_MIN || n > NUMBER_MAX) {
         issues.push({ field: "number", message: "0–99." });
       }

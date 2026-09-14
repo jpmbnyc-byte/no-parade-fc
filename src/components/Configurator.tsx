@@ -87,7 +87,7 @@ export const Configurator = forwardRef<HTMLDivElement>(function Configurator(_pr
           <CrestCanvas
             view={view}
             frontSrc="/france-front-placeholder.jpg"
-            backSrc={null}
+            backSrc="/france-back.jpg"
             name={state.name}
             number={state.number}
             year={state.year}

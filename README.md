@@ -47,15 +47,20 @@ Nothing below blocks the app from working end-to-end; it blocks the
 *preview* from being pixel-accurate. Swap these in and nothing else
 needs to change:
 
-- **Blank front/back jersey plates.** There is no real blank France
-  Edition photography yet, so `frontSrc` in `Configurator.tsx` points
-  at the finished reference mock (`public/france-front-placeholder.jpg`)
-  and the back view renders an honest text-only placeholder instead of
-  a fake photo (`CrestCanvas.tsx`, the `!backSrc` branch). Once real
-  blank plates exist, pass their URLs as `frontSrc`/`backSrc` and
-  re-tune `CREST_LAYOUT` in `src/lib/kit.ts` against them — the name/
-  number/crest overlay positions there were eyeballed against the
-  finished mock, not measured off a blank plate.
+- **Front plate.** `frontSrc` still points at the finished reference
+  mock (`public/france-front-placeholder.jpg`) — there's no real blank
+  France Edition front photo yet, so the crest badge overlay sits on
+  top of the already-printed NPFC crest. Swap it in and re-check
+  `CREST_LAYOUT.crestBadge` once a blank front exists.
+- **Back plate — real photo now in use.** `public/france-back.jpg` is
+  the actual France Edition back print (no name/number baked in), not
+  a placeholder — `CrestCanvas.tsx`'s `!backSrc` fallback only fires
+  when a nation has no back photo at all (still true for Jamaica/Haiti/
+  USA). `public/haiti-back.jpg` is saved for when the Haiti nation
+  unlocks, but nothing wires it up yet. Both source images have a
+  visible checker pattern instead of real transparency (they're flat
+  RGB, not RGBA) — harmless behind the dark preview panel, but worth
+  a real cutout/transparent export if that bothers anyone visually.
 - **Real crest artwork.** The 5 crest badges (Peace, Heritage, Grace,
   Club, Family) in `src/components/CrestBadge.tsx` are original
   placeholder line-art capturing each crest's theme, not the licensed
