@@ -1,15 +1,7 @@
-import type { CrestId, KitId } from "@/lib/kit";
-
 export type CheckoutPayload = {
-  kitId: KitId;
   nation: string;
   name: string;
   number: string;
-  year: string;
-  crestId: CrestId | null;
-  crestInitials: string;
-  motto: string;
-  heritage: string;
 };
 
 export async function startCheckout(payload: CheckoutPayload): Promise<void> {

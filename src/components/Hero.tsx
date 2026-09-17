@@ -19,7 +19,7 @@ export function Hero({ onHome, onAbout, onBuild }: Props) {
             NPFC
           </button>
           <button onClick={onBuild} className="text-[var(--gold)] transition-colors hover:text-[var(--cream)]">
-            Build Your Crest™
+            Put Your Name On It
           </button>
           <button onClick={onAbout} className="transition-colors hover:text-[var(--cream)]">
             PBWY
@@ -32,20 +32,19 @@ export function Hero({ onHome, onAbout, onBuild }: Props) {
 
       <div className="mx-auto grid max-w-[1400px] gap-10 px-6 py-16 sm:px-10 sm:py-20 lg:grid-cols-2 lg:items-center">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.28em] text-[var(--gold)]">Build Your Crest™</p>
+          <p className="text-xs font-bold uppercase tracking-[0.28em] text-[var(--gold)]">Put Your Name On It</p>
           <h1
             className="mt-5 text-[clamp(2rem,4.6vw,3.4rem)] leading-[1.08]"
             style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
           >
             Every kit needs a name.
             <br />
-            Every name needs a crest.
+            Clean, or personalized.
           </h1>
           <p className="mt-6 max-w-md text-sm leading-relaxed text-[var(--muted)]">
-            Create your own No Parade F.C. identity — name, number, crest
-            language, motto, and heritage line — built into a
-            country-coded jersey made for sport, street, faith, and
-            memory.
+            A clean, customizable No Parade F.C. jersey — name and number,
+            country-coded, made for sport, street, faith, and memory.
+            Leave it blank for the clean edition, or put your name on it.
           </p>
           <div className="mt-9 flex flex-wrap gap-4">
             <button

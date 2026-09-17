@@ -1,13 +1,19 @@
-# No Parade F.C. — Build Your Crest™
+# No Parade F.C. — Put Your Name On It
 
-A working jersey customizer: 5-step configurator (Kit → Name & Number →
-Crest Language → Crest Details → Review) with a live overlay preview
-and Stripe checkout, replacing the frozen Shopify + Teeinblue listings.
+A working jersey customizer with a live overlay preview and Stripe
+checkout, replacing the frozen Shopify + Teeinblue listings. Standard
+name/number personalization only — no crest, motto, or heritage line;
+that flow was retired in favor of the exact working setup already
+proven on Bayonne Athletics' product page (`ba-athletics.com/team`).
 
-The overlay engine (percentage-of-plate lettering, canvas-based ink
-centering) is ported from Bayonne Athletics' `src/components/ProductCanvas.tsx`
-and `src/lib/kit.ts` — same technique, extended with the crest badge,
-motto, and heritage-line layers this configurator needs.
+The whole mechanic is ported from there, not just the overlay math:
+`src/components/JerseyCanvas.tsx` is Bayonne's `ProductCanvas.tsx`
+(percentage-of-plate lettering, canvas-based ink centering), and
+`src/components/Configurator.tsx` is the same single-panel PDP pattern
+as Bayonne's `team.$slug.$product.tsx` — a Gallery vs. "Put your name
+on it" toggle, front/back tabs, a number+name field pair, a confirm
+checkbox, and a dynamic clean-vs-personalized price — not the old
+5-step wizard.
 
 ## Branding
 
@@ -16,14 +22,13 @@ F.C. logo (trimmed, `logo-white.png` recolored for dark backgrounds —
 regenerate it from `logo.png` if the source art changes rather than
 hand-editing it). Used in the nav, footer, both order pages, and
 `public/favicon.png` (cropped to just the chevron mark). `public/og.jpg`
-is a built social-share card (logo + headline + France Edition photo) —
-`index.html`'s `og:image`/`twitter:image` point at it via the
-`npfc.noparade.store` domain from the deploy plan below, which
-isn't live yet; the tags will just work once DNS is.
+is a built social-share card from the old Build Your Crest headline —
+due for a re-render now that the product is name/number only; the
+meta tags in `index.html` already point at the new copy.
 
 Every nav item, footer link, and hero CTA is wired to something real:
 `Home` scrolls to top, `NPFC`/`PBWY`/`Explore NPFC` scroll to the "This
-is not merch" section, `Build Your Crest™`/`Collections`/the hero's
+is not merch" section, `Put Your Name On It`/`Collections`/the hero's
 primary CTA scroll to the configurator. There's no multi-page routing
 here (yet) — everything lives on the one page, so these are anchors,
 not separate destinations.
@@ -47,7 +52,9 @@ npm run dev       # app on :5173
 The dev server proxies `/api/*` to `localhost:3000` (see
 `vite.config.ts`) — run `vercel dev` in a second terminal to serve the
 API functions locally, or just test against the deployed Vercel
-preview.
+preview. (Checkout will 500 under plain `vite preview`/`vite dev`
+without `vercel dev` running alongside it — the Edge Functions aren't
+served by Vite's own static/dev server.)
 
 ## Deploy (Vercel)
 
@@ -57,8 +64,20 @@ preview.
    `/order/complete` mock so the UI can still be reviewed end-to-end.
 3. Attach the custom domain: add `npfc.noparade.store` in this
    project's Vercel domain settings, then point a `CNAME` for `npfc`
-   at your `noparade.store` DNS provider → `cname.vercel-dns.com`. See
-   `No-Parade-Main`'s README for the full hub domain plan.
+   at your `noparade.store` DNS provider → the CNAME target Vercel
+   shows for this project. See `No-Parade-Main`'s README for the full
+   hub domain plan.
+
+## Pricing
+
+Same differential pattern as Bayonne's PDP: leave both fields blank
+for the clean jersey, fill in both for the personalized one.
+
+- **Clean** — $118 (blank fields, no personalization)
+- **Personalized** — $138 (name + number both present and valid)
+
+`PRICE`/`PERSONALIZED_PRICE` in `src/lib/kit.ts` are the single source
+for both the UI and `api/create-checkout-session.ts`.
 
 ## Pending assets — placeholders in place, need real files
 
@@ -68,12 +87,11 @@ needs to change:
 
 - **Front plate.** `frontSrc` still points at the finished reference
   mock (`public/france-front-placeholder.jpg`) — there's no real blank
-  France Edition front photo yet, so the crest badge overlay sits on
-  top of the already-printed NPFC crest. Swap it in and re-check
-  `CREST_LAYOUT.crestBadge` once a blank front exists.
+  France Edition front photo yet. Swap it in once a blank front exists;
+  `JERSEY_LAYOUT.numberFront` may need re-tuning against it.
 - **Back plate — real photo now in use.** `public/france-back.jpg` is
   the actual France Edition back print (no name/number baked in), not
-  a placeholder — `CrestCanvas.tsx`'s `!backSrc` fallback only fires
+  a placeholder — `JerseyCanvas.tsx`'s `!backSrc` fallback only fires
   when a nation has no back photo at all (still true for Jamaica/USA).
   Both source images have a visible checker pattern instead of real
   transparency (flat RGB, not RGBA) — harmless behind the dark preview
@@ -87,25 +105,22 @@ needs to change:
   and `Configurator.tsx` still hardcodes the France assets, so neither
   file is live anywhere yet. Before flipping Haiti on: the lifestyle
   front photo isn't cropped to the garment the way France's front is,
-  so name/number/crest overlay positions would need re-tuning against
-  it specifically (or swap in a flatter product-style front photo if
-  one exists, to match France's treatment).
-- **Real crest artwork.** The 5 crest badges (Peace, Heritage, Grace,
-  Club, Family) in `src/components/CrestBadge.tsx` are original
-  placeholder line-art capturing each crest's theme, not the licensed
-  final designs. Swap in real crest images (or vector paths) once
-  they exist.
+  so name/number overlay positions would need re-tuning against it
+  specifically (or swap in a flatter product-style front photo if one
+  exists, to match France's treatment).
 - **Brand typeface.** Jersey lettering currently renders in the UI's
   own font (Manrope) rather than a licensed print face — same
   "swap the font, nothing else changes" situation as Bayonne
   Athletics' local OTF fonts.
+- **OG card.** `public/og.jpg` still carries the old Build Your Crest
+  headline — regenerate it against the new "Put Your Name On It" copy
+  once there's a moment for it; the site works fine without this.
 - **Other nations.** Jamaica, Haiti, and USA editions are wired into
   `NATIONS` in `src/lib/kit.ts` as `unlocked: false` — add their kit
   photography and flip the flag once each is ready.
 
 ## What checkout captures
 
-`api/create-checkout-session.ts` puts every field (kit, nation, name,
-number, year, crest, crest initials, motto, heritage line) into the
-Stripe Checkout Session's `metadata`, so it survives to the order and
-`order-summary` can read it back on the confirmation page.
+`api/create-checkout-session.ts` puts nation, name, and number into
+the Stripe Checkout Session's `metadata`, so it survives to the order
+and `order-summary` can read it back on the confirmation page.

@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { CREST_LAYOUT, type CrestId } from "@/lib/kit";
+import { JERSEY_LAYOUT } from "@/lib/kit";
 import { useInkBias } from "@/lib/useInkBias";
-import { CrestBadge } from "@/components/CrestBadge";
 
 export type CanvasView = "front" | "back";
 
@@ -12,36 +11,28 @@ type Props = {
   backSrc: string | null;
   name: string;
   number: string;
-  year: string;
-  motto: string;
-  heritage: string;
-  crestId: CrestId | null;
   fontFamily?: string;
 };
 
 /**
- * Live overlay preview — ported from Bayonne Athletics' ProductCanvas.tsx
- * (percentage-of-plate lettering, canvas ink-bias centering) and extended
- * with the crest badge, motto, and heritage-line layers Build Your Crest
- * needs. Positions in src/lib/kit.ts's CREST_LAYOUT are PLACEHOLDER —
- * tuned against the finished reference mock, not a real blank plate.
- * Swap frontSrc/backSrc for real blank photography and re-tune once
- * that's available; nothing else here needs to change.
+ * Live overlay preview — ported from Bayonne Athletics' ProductCanvas.tsx:
+ * percentage-of-plate lettering, canvas ink-bias centering, name on the
+ * back baseline, number on front and back. Positions in src/lib/kit.ts's
+ * JERSEY_LAYOUT are PLACEHOLDER — tuned against the finished reference
+ * mock, not a real blank plate. Swap frontSrc/backSrc for real blank
+ * photography and re-tune once that's available; nothing else here
+ * needs to change.
  */
-export function CrestCanvas({
+export function JerseyCanvas({
   view,
   frontSrc,
   backSrc,
   name,
   number,
-  year,
-  motto,
-  heritage,
-  crestId,
   fontFamily = "'Manrope', sans-serif",
 }: Props) {
   const [plate, setPlate] = useState<{ w: number; h: number } | null>(null);
-  const layout = CREST_LAYOUT;
+  const layout = JERSEY_LAYOUT;
 
   const nameChars = Math.max(name.replace(/\s/g, "").length, 1);
   const nameTracking = nameChars >= 10 ? 0.01 : nameChars >= 7 ? 0.035 : 0.06;
@@ -165,68 +156,6 @@ export function CrestCanvas({
           >
             {number}
           </p>
-        ) : null}
-
-        {showBack && year ? (
-          <p
-            className="absolute text-center uppercase tracking-[0.3em]"
-            style={{
-              top: `${layout.year.y}%`,
-              left: `${layout.centerX}%`,
-              transform: "translateX(-50%)",
-              fontFamily,
-              fontSize: `calc(${layout.year.heightPct} * 1cqh)`,
-              color: "var(--gold)",
-            }}
-          >
-            {year}
-          </p>
-        ) : null}
-
-        {showBack && motto ? (
-          <p
-            className="absolute w-[70%] text-center uppercase tracking-[0.18em]"
-            style={{
-              top: `${layout.motto.y}%`,
-              left: `${layout.centerX}%`,
-              transform: "translateX(-50%)",
-              fontFamily,
-              fontWeight: 600,
-              fontSize: `calc(${layout.motto.heightPct} * 1cqh)`,
-              color: "var(--cream)",
-            }}
-          >
-            {motto}
-          </p>
-        ) : null}
-
-        {showBack && heritage ? (
-          <p
-            className="absolute w-[70%] text-center uppercase tracking-[0.14em]"
-            style={{
-              top: `${layout.heritage.y}%`,
-              left: `${layout.centerX}%`,
-              transform: "translateX(-50%)",
-              fontFamily,
-              fontSize: `calc(${layout.heritage.heightPct} * 1cqh)`,
-              color: "var(--muted)",
-            }}
-          >
-            {heritage}
-          </p>
-        ) : null}
-
-        {showFront && crestId ? (
-          <div
-            className="absolute"
-            style={{
-              top: `${layout.crestBadge.y}%`,
-              left: `${layout.crestBadge.x}%`,
-              width: `${layout.crestBadge.widthPct}%`,
-            }}
-          >
-            <CrestBadge id={crestId} className="w-full text-[var(--gold)]" />
-          </div>
         ) : null}
       </div>
     </figure>

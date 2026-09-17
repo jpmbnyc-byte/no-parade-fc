@@ -1,25 +1,12 @@
 import Stripe from "stripe";
-import {
-  CREST_INITIALS_MAX,
-  HERITAGE_MAX,
-  KIT_LABEL,
-  KIT_PRICING,
-  MOTTO_MAX,
-  type KitId,
-} from "../src/lib/kit";
+import { PERSONALIZED_PRICE, PRICE } from "../src/lib/kit";
 
 export const config = { runtime: "edge" };
 
 type Body = {
-  kitId: KitId;
   nation: string;
   name: string;
   number: string;
-  year: string;
-  crestId: string | null;
-  crestInitials: string;
-  motto: string;
-  heritage: string;
 };
 
 function stripeClient() {
@@ -34,19 +21,10 @@ export default async function handler(req: Request): Promise<Response> {
   }
 
   const body = (await req.json()) as Body;
-  const kitId: KitId = body.kitId === "clean" ? "clean" : "crest";
-  const unitAmount = KIT_PRICING[kitId] * 100;
+  const personalized = Boolean(body.name && body.number);
+  const unitAmount = (personalized ? PERSONALIZED_PRICE : PRICE) * 100;
 
-  const description = [
-    body.nation,
-    body.name && `Name: ${body.name}`,
-    body.number && `# ${body.number}`,
-    body.year,
-    kitId === "crest" && body.crestId && `Crest: ${body.crestId}`,
-    kitId === "crest" && body.crestInitials && body.crestInitials.slice(0, CREST_INITIALS_MAX),
-    kitId === "crest" && body.motto && body.motto.slice(0, MOTTO_MAX),
-    kitId === "crest" && body.heritage && body.heritage.slice(0, HERITAGE_MAX),
-  ]
+  const description = [body.nation, body.name && `Name: ${body.name}`, body.number && `# ${body.number}`]
     .filter(Boolean)
     .join(" · ");
 
@@ -73,22 +51,16 @@ export default async function handler(req: Request): Promise<Response> {
           currency: "usd",
           unit_amount: unitAmount,
           product_data: {
-            name: `No Parade F.C. — ${KIT_LABEL[kitId]}`,
+            name: `No Parade F.C. — ${personalized ? "Personalized Jersey" : "Clean Jersey"}`,
             description,
           },
         },
       },
     ],
     metadata: {
-      kit: kitId,
       nation: body.nation,
       name: body.name,
       number: body.number,
-      year: body.year,
-      crest: body.crestId ?? "",
-      crest_initials: body.crestInitials,
-      motto: body.motto,
-      heritage: body.heritage,
     },
     success_url: `${origin}/order/complete?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/order/cancel`,

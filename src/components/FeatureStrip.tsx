@@ -1,9 +1,8 @@
 const FEATURES = [
   { title: "Choose your nation", detail: "Start with a country-coded No Parade F.C. kit." },
   { title: "Add your name & number", detail: "Classic football personalization, refined." },
-  { title: "Select your crest language", detail: "Faith, family, peace, heritage, or personal code." },
-  { title: "Add your motto", detail: "A short phrase that lives with the piece." },
-  { title: "Preview your kit", detail: "See the identity before it enters production." },
+  { title: "Preview live", detail: "See your name and number on the kit before it enters production." },
+  { title: "Clean or personalized", detail: "Leave both fields blank for the clean edition." },
 ];
 
 export function FeatureStrip() {
@@ -14,12 +13,12 @@ export function FeatureStrip() {
           This is not merch. This is authorship.
         </p>
         <p className="mt-5 max-w-md text-sm leading-relaxed text-[var(--muted)]">
-          A jersey can carry a country. A crest can carry a story. A
-          number can carry memory. A motto can carry faith. Build Your
-          Crest™ turns every No Parade F.C. kit into a personal artifact.
+          A jersey can carry a country. A name can carry a story. A
+          number can carry memory. A clean, customizable kit turns every
+          No Parade F.C. edition into a personal artifact.
         </p>
 
-        <div className="mt-12 grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-5">
+        <div className="mt-12 grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-4">
           {FEATURES.map((f) => (
             <div key={f.title}>
               <p className="text-xs font-bold uppercase tracking-[0.1em] text-[var(--gold)]">{f.title}</p>
