@@ -18,7 +18,7 @@ hand-editing it). Used in the nav, footer, both order pages, and
 `public/favicon.png` (cropped to just the chevron mark). `public/og.jpg`
 is a built social-share card (logo + headline + France Edition photo) —
 `index.html`'s `og:image`/`twitter:image` point at it via the
-`npfc.noparade-store.com` domain from the deploy plan below, which
+`npfc.noparade.store` domain from the deploy plan below, which
 isn't live yet; the tags will just work once DNS is.
 
 Every nav item, footer link, and hero CTA is wired to something real:
@@ -55,10 +55,10 @@ preview.
 2. Environment variable: `STRIPE_SECRET_KEY` (a restricted or secret
    key, `rk_...`/`sk_...`). Without it, checkout falls back to a local
    `/order/complete` mock so the UI can still be reviewed end-to-end.
-3. Attach the custom domain once DNS is ready — see `No-Parade-Main`'s
-   README for the full domain/DNS runbook (`npfc.noparade-store.com`
-   needs to be added in Shopify's old domain settings first if that's
-   still holding the name, then pointed here instead).
+3. Attach the custom domain: add `npfc.noparade.store` in this
+   project's Vercel domain settings, then point a `CNAME` for `npfc`
+   at your `noparade.store` DNS provider → `cname.vercel-dns.com`. See
+   `No-Parade-Main`'s README for the full hub domain plan.
 
 ## Pending assets — placeholders in place, need real files
 
