@@ -1,8 +1,8 @@
 const FEATURES = [
-  { title: "Choose your nation", detail: "Start with a country-coded No Parade F.C. kit." },
-  { title: "Add your name & number", detail: "Classic football personalization, refined." },
-  { title: "Preview live", detail: "See your name and number on the kit before it enters production." },
-  { title: "Clean or personalized", detail: "Leave both fields blank for the clean edition." },
+  { title: "Choose your legend", detail: "Pelé, Robben, Henry, or Reyna — four fixed colorways." },
+  { title: "Pick your print", detail: "Tribute (their name), Blank (no name), or Custom (yours)." },
+  { title: "Preview live", detail: "See the colorway and, in Custom, your own name and number." },
+  { title: "Wear the number", detail: "Carry the story. One release, four legends." },
 ];
 
 export function FeatureStrip() {
@@ -13,9 +13,9 @@ export function FeatureStrip() {
           This is not merch. This is authorship.
         </p>
         <p className="mt-5 max-w-md text-sm leading-relaxed text-[var(--muted)]">
-          A jersey can carry a country. A name can carry a story. A
-          number can carry memory. A clean, customizable kit turns every
-          No Parade F.C. edition into a personal artifact.
+          A collection built around the idea that champions aren't defined by one thing.
+          Sometimes it's trophies. Sometimes it's invention. Sometimes it's the ability to make
+          an entire generation see the game differently.
         </p>
 
         <div className="mt-12 grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-4">

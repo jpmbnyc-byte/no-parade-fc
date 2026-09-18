@@ -1,61 +1,65 @@
 import { forwardRef, useState, type HTMLAttributes } from "react";
 import {
-  INITIAL_BUILD,
+  CHAMPIONS,
   NAME_MAX,
-  NATIONS,
   NUMBER_MAX,
   NUMBER_MIN,
-  PERSONALIZED_PRICE,
-  PRICE,
+  championById,
+  priceFor,
   sanitizeName,
   sanitizeNumber,
   validateBuild,
-  type NationId,
+  type ChampionId,
+  type Mode,
 } from "@/lib/kit";
 import { JerseyCanvas, type CanvasView } from "@/components/JerseyCanvas";
 import { startCheckout } from "@/lib/checkout";
 
-type GalleryMode = "gallery" | "customize";
+const MODES: Mode[] = ["tribute", "blank", "custom"];
 
 /**
- * Single-panel personalization flow — the exact working mechanic from
- * Bayonne Athletics' product page (ba-athletics.com/team): a Gallery vs.
- * "Put your name on it" toggle, live front/back preview, a name+number
- * field pair, and a dynamic clean-vs-personalized price. No crest step,
- * no wizard — same standard name/number setup as its working
- * counterpart, not the retired Build Your Crest flow.
+ * The Champions — Release 01. Four fixed colorways (Pelé/Garnet,
+ * Robben/Orange, Henry/Powder Blue, Reyna/Black), each sold three ways:
+ * Tribute (the legend's exact print, not editable), Blank (no name or
+ * number), or Custom (your own name + number — the same personalization
+ * engine ported from Bayonne Athletics' product page). Replaces the
+ * retired nation-edition architecture entirely.
  */
 export const Configurator = forwardRef<HTMLDivElement>(function Configurator(_props, ref) {
-  const [nation, setNation] = useState<NationId>(INITIAL_BUILD.nation);
+  const [championId, setChampionId] = useState<ChampionId>("pele");
+  const [mode, setMode] = useState<Mode>("tribute");
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
   const [view, setView] = useState<CanvasView>("front");
-  const [mode, setMode] = useState<GalleryMode>("gallery");
   const [confirmed, setConfirmed] = useState(false);
   const [checkoutBusy, setCheckoutBusy] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
-  const issues = validateBuild({ name, number });
+  const champion = championById(championId);
+  const price = priceFor(mode);
+
+  const effectiveName = mode === "tribute" ? champion.legendName : mode === "custom" ? name : "";
+  const effectiveNumber = mode === "tribute" ? champion.legendNumber : mode === "custom" ? number : "";
+
+  const issues = mode === "custom" ? validateBuild({ name, number }) : [];
   const nameError = issues.find((i) => i.field === "name")?.message;
   const numberError = issues.find((i) => i.field === "number")?.message;
 
-  const hasPersonalization = Boolean(name || number);
   const numberValue = Number(number);
   const numberValid =
     number !== "" && Number.isFinite(numberValue) && numberValue >= NUMBER_MIN && numberValue <= NUMBER_MAX;
-  const personalizationComplete = !hasPersonalization || Boolean(name && numberValid);
-  const price = hasPersonalization && personalizationComplete ? PERSONALIZED_PRICE : PRICE;
-  const checkoutReady = personalizationComplete && confirmed;
+  const customComplete = mode !== "custom" || Boolean(name && numberValid && issues.length === 0);
+  const checkoutReady = customComplete && confirmed;
 
   const nextLabel = (() => {
     if (checkoutBusy) return "Redirecting to checkout";
-    if (hasPersonalization && !personalizationComplete) return "Complete name + number";
+    if (mode === "custom" && !customComplete) return "Complete name + number";
     if (!confirmed) return "Confirm selection";
     return `Checkout · $${price}`;
   })();
 
   async function goNext() {
-    if (hasPersonalization && !personalizationComplete) {
+    if (mode === "custom" && !customComplete) {
       document.getElementById("field-personalize")?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
@@ -69,9 +73,10 @@ export const Configurator = forwardRef<HTMLDivElement>(function Configurator(_pr
     setCheckoutError(null);
     try {
       await startCheckout({
-        nation,
-        name: hasPersonalization ? name : "",
-        number: hasPersonalization ? number : "",
+        championId,
+        mode,
+        name: mode === "custom" ? name : "",
+        number: mode === "custom" ? number : "",
       });
     } catch (e) {
       setCheckoutBusy(false);
@@ -81,161 +86,183 @@ export const Configurator = forwardRef<HTMLDivElement>(function Configurator(_pr
 
   return (
     <section ref={ref} className="mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
-      <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
+      <p className="text-xs font-bold uppercase tracking-[0.28em] text-[var(--gold)]">
+        The Champions — Release 01
+      </p>
+      <h2 className="mt-2 text-3xl" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>
+        Four legends. Four colors. One shirt.
+      </h2>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {CHAMPIONS.map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            onClick={() => {
+              setChampionId(c.id);
+              setView("front");
+            }}
+            className={`flex items-center gap-2 border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] transition-colors ${
+              championId === c.id
+                ? "border-[var(--gold)] text-[var(--gold)]"
+                : "border-[var(--panel-line)] text-[var(--muted)] hover:border-[var(--muted)]"
+            }`}
+          >
+            <span
+              className="size-2.5 rounded-full border border-black/30"
+              style={{ background: c.swatch }}
+              aria-hidden
+            />
+            {c.legendName} {c.legendNumber} — {c.colorLabel}
+          </button>
+        ))}
+      </div>
+
+      <div className="mt-10 grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
         <div className="lg:sticky lg:top-10">
-          <div className="mb-4 flex flex-wrap gap-2">
-            {NATIONS.map((n) => (
+          <div className="mb-3 flex gap-2">
+            {MODES.map((m) => (
               <button
-                key={n.id}
+                key={m}
                 type="button"
-                disabled={!n.unlocked}
-                onClick={() => n.unlocked && setNation(n.id)}
-                className={`border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] transition-colors ${
-                  nation === n.id
-                    ? "border-[var(--gold)] text-[var(--gold)]"
-                    : "border-[var(--panel-line)] text-[var(--muted)] hover:border-[var(--muted)]"
-                } ${!n.unlocked ? "cursor-not-allowed opacity-40" : ""}`}
+                onClick={() => setMode(m)}
+                className={`border px-4 py-2 text-sm transition-colors ${
+                  mode === m
+                    ? "border-[var(--gold)] bg-[var(--gold)] text-[var(--ink)]"
+                    : "border-[var(--panel-line)] text-[var(--muted)]"
+                }`}
               >
-                {n.flagEmoji} {n.label}
-                {!n.unlocked ? " · Soon" : ""}
+                {m === "tribute" ? "Tribute" : m === "blank" ? "Blank" : "Custom"}
               </button>
             ))}
           </div>
 
-          <div className="mb-3 flex gap-2">
-            <button
-              type="button"
-              onClick={() => setMode("gallery")}
-              className={`border px-4 py-2 text-sm transition-colors ${
-                mode !== "customize" ? "border-[var(--gold)] bg-[var(--gold)] text-[var(--ink)]" : "border-[var(--panel-line)] text-[var(--muted)]"
-              }`}
-            >
-              Gallery
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setView("front");
-                setMode("customize");
-              }}
-              className={`border px-4 py-2 text-sm transition-colors ${
-                mode === "customize" ? "border-[var(--gold)] bg-[var(--gold)] text-[var(--ink)]" : "border-[var(--panel-line)] text-[var(--muted)]"
-              }`}
-            >
-              Put your name on it
-            </button>
-          </div>
-
-          {mode === "customize" ? (
-            <div>
-              <JerseyCanvas
-                view={view}
-                frontSrc="/france-front-placeholder.jpg"
-                backSrc="/france-back.jpg"
-                name={name}
-                number={number}
-              />
-              <div className="mt-3 flex items-baseline justify-between gap-3">
-                <div className="flex items-baseline gap-4">
-                  <button
-                    type="button"
-                    onClick={() => setView("front")}
-                    aria-pressed={view === "front"}
-                    className={`text-xs font-semibold uppercase tracking-[0.14em] transition-colors ${
-                      view === "front" ? "text-[var(--gold)]" : "text-[var(--muted)]"
-                    }`}
-                  >
-                    Front
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setView("back")}
-                    aria-pressed={view === "back"}
-                    className={`text-xs font-semibold uppercase tracking-[0.14em] transition-colors ${
-                      view === "back" ? "text-[var(--gold)]" : "text-[var(--muted)]"
-                    }`}
-                  >
-                    Back
-                  </button>
-                </div>
-                <p className="text-xs text-[var(--muted)]">
-                  {view === "front" ? "Live number" : "Live name and number"}
-                </p>
-              </div>
+          <JerseyCanvas
+            view={view}
+            frontSrc={champion.frontSrc}
+            backSrc={mode === "tribute" ? champion.backSrc : null}
+            name={effectiveName}
+            number={effectiveNumber}
+            showOverlay={mode !== "tribute"}
+          />
+          <div className="mt-3 flex items-baseline justify-between gap-3">
+            <div className="flex items-baseline gap-4">
+              <button
+                type="button"
+                onClick={() => setView("front")}
+                aria-pressed={view === "front"}
+                className={`text-xs font-semibold uppercase tracking-[0.14em] transition-colors ${
+                  view === "front" ? "text-[var(--gold)]" : "text-[var(--muted)]"
+                }`}
+              >
+                Front
+              </button>
+              <button
+                type="button"
+                onClick={() => setView("back")}
+                aria-pressed={view === "back"}
+                className={`text-xs font-semibold uppercase tracking-[0.14em] transition-colors ${
+                  view === "back" ? "text-[var(--gold)]" : "text-[var(--muted)]"
+                }`}
+              >
+                Back
+              </button>
             </div>
-          ) : (
-            <figure className="relative aspect-[4/5] w-full overflow-hidden rounded-sm bg-[var(--panel)]">
-              <img
-                src="/france-front-placeholder.jpg"
-                alt="No Parade F.C. France Edition jersey"
-                className="absolute inset-0 h-full w-full object-contain object-center"
-              />
-            </figure>
-          )}
+            <p className="text-xs text-[var(--muted)]">
+              {mode === "tribute"
+                ? "Real print — not editable"
+                : view === "front"
+                  ? "Front carries no name or number"
+                  : mode === "blank"
+                    ? "No name or number"
+                    : "Live name and number"}
+            </p>
+          </div>
         </div>
 
         <div>
-          <div className="flex items-baseline justify-between gap-4">
-            <h2 className="text-2xl" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>
-              Put your name on it.
-            </h2>
-            <span className="text-sm font-semibold tabular-nums text-[var(--gold)]">
-              {hasPersonalization ? `$${price}` : `+$${PERSONALIZED_PRICE - PRICE}`}
-            </span>
-          </div>
-          <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
-            Number on the front and back. Name across the back. Same digits, same font. Letters,
-            spaces, hyphens and apostrophes. Leave both blank for the ${PRICE} clean jersey.
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
+            LEGEND / ICON / CHAMPION
           </p>
-
-          <div id="field-personalize" className="mt-5 grid grid-cols-[7rem_1fr] gap-3">
-            <OutlinedField
-              id="field-number"
-              label="00"
-              value={number}
-              maxLength={2}
-              inputMode="numeric"
-              placeholder="07"
-              onChange={(v) => {
-                setNumber(sanitizeNumber(v));
-                setView("front");
-                setMode("customize");
-              }}
-              counter={`${number.length} / 2`}
-              error={numberError}
-            />
-            <OutlinedField
-              id="field-name"
-              label="Name"
-              value={name}
-              maxLength={NAME_MAX}
-              placeholder="YOUR NAME"
-              onChange={(v) => {
-                setName(sanitizeName(v));
-                setMode("customize");
-              }}
-              counter={`${name.length} / ${NAME_MAX}`}
-              error={nameError}
-            />
+          <div className="mt-2 flex items-baseline justify-between gap-4">
+            <h3 className="text-2xl" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>
+              {champion.legendName} / {champion.legendNumber} / {champion.colorLabel}
+            </h3>
+            <span className="shrink-0 text-sm font-semibold tabular-nums text-[var(--gold)]">${price}</span>
           </div>
+          <p className="mt-1 text-sm italic text-[var(--muted)]">{champion.country}</p>
+          <p className="mt-1 text-sm font-semibold text-[var(--cream)]">{champion.tagline}</p>
 
-          {hasPersonalization && !personalizationComplete && (
-            <p className="mt-3 text-sm text-[var(--gold)]">
-              Add both a name and a valid number, or clear both fields.
+          {mode === "tribute" ? (
+            <div className="mt-5">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
+                Why he is a Champion
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">{champion.bio}</p>
+              <p className="mt-4 text-sm text-[var(--muted)]">
+                Printed exactly as shown — {champion.legendName}'s name and number, not editable. Want a
+                different print? Switch to Blank or Custom above.
+              </p>
+            </div>
+          ) : mode === "blank" ? (
+            <p className="mt-5 text-sm leading-relaxed text-[var(--muted)]">
+              This colorway with no name or number — a clean {champion.colorLabel.toLowerCase()} shirt.
+              Switch to Custom to put your own name on it, or Tribute for {champion.legendName}'s exact
+              print.
             </p>
-          )}
+          ) : (
+            <div className="mt-5">
+              <p className="text-sm leading-relaxed text-[var(--muted)]">
+                Your name and number on the {champion.colorLabel.toLowerCase()} colorway. Same digits, same
+                font. Letters, spaces, hyphens and apostrophes.
+              </p>
 
-          <button
-            type="button"
-            onClick={() => {
-              setName("");
-              setNumber("");
-            }}
-            disabled={!hasPersonalization}
-            className="mt-3 text-sm text-[var(--muted)] underline underline-offset-4 disabled:opacity-40"
-          >
-            Clear personalization
-          </button>
+              <div id="field-personalize" className="mt-5 grid grid-cols-[7rem_1fr] gap-3">
+                <OutlinedField
+                  id="field-number"
+                  label="00"
+                  value={number}
+                  maxLength={2}
+                  inputMode="numeric"
+                  placeholder="07"
+                  onChange={(v) => {
+                    setNumber(sanitizeNumber(v));
+                    setView("front");
+                  }}
+                  counter={`${number.length} / 2`}
+                  error={numberError}
+                />
+                <OutlinedField
+                  id="field-name"
+                  label="Name"
+                  value={name}
+                  maxLength={NAME_MAX}
+                  placeholder="YOUR NAME"
+                  onChange={(v) => setName(sanitizeName(v))}
+                  counter={`${name.length} / ${NAME_MAX}`}
+                  error={nameError}
+                />
+              </div>
+
+              {!customComplete && (name || number) && (
+                <p className="mt-3 text-sm text-[var(--gold)]">
+                  Add both a name and a valid number, or clear both fields.
+                </p>
+              )}
+
+              <button
+                type="button"
+                onClick={() => {
+                  setName("");
+                  setNumber("");
+                }}
+                disabled={!name && !number}
+                className="mt-3 text-sm text-[var(--muted)] underline underline-offset-4 disabled:opacity-40"
+              >
+                Clear personalization
+              </button>
+            </div>
+          )}
 
           <section id="field-confirm" className="mt-8 border-t border-[var(--panel-line)] pt-6">
             <label className="flex items-start gap-3 text-sm leading-snug text-[var(--muted)]">
@@ -246,9 +273,9 @@ export const Configurator = forwardRef<HTMLDivElement>(function Configurator(_pr
                 className="mt-0.5 size-4 shrink-0 accent-[var(--gold)]"
               />
               <span>
-                {hasPersonalization
-                  ? "I've checked the spelling, number, and edition. Personalized pieces cannot be changed after checkout."
-                  : "I've checked the edition selection."}
+                {mode === "custom"
+                  ? "I've checked the spelling, number, and colorway. Personalized pieces cannot be changed after checkout."
+                  : "I've checked the colorway and edition."}
               </span>
             </label>
             {checkoutError && (
@@ -267,7 +294,8 @@ export const Configurator = forwardRef<HTMLDivElement>(function Configurator(_pr
             {nextLabel}
           </button>
           <p className="mt-3 text-center text-xs leading-snug text-[var(--muted)]">
-            Clean ${PRICE} · personalized ${PERSONALIZED_PRICE} · Stripe checkout
+            Tribute ${priceFor("tribute")} · Blank ${priceFor("blank")} · Custom ${priceFor("custom")} ·
+            Stripe checkout
           </p>
         </div>
       </div>

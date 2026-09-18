@@ -11,17 +11,26 @@ type Props = {
   backSrc: string | null;
   name: string;
   number: string;
+  /**
+   * false in Tribute mode: the photo already has the legend's name/number
+   * baked in at full print quality, so no live text layer is drawn on
+   * top of it (that would double the print). true in Blank/Custom mode,
+   * where the plate has no printing and the live overlay is the only
+   * name/number shown.
+   */
+  showOverlay?: boolean;
   fontFamily?: string;
 };
 
 /**
  * Live overlay preview — ported from Bayonne Athletics' ProductCanvas.tsx:
  * percentage-of-plate lettering, canvas ink-bias centering, name on the
- * back baseline, number on front and back. Positions in src/lib/kit.ts's
- * JERSEY_LAYOUT are PLACEHOLDER — tuned against the finished reference
- * mock, not a real blank plate. Swap frontSrc/backSrc for real blank
- * photography and re-tune once that's available; nothing else here
- * needs to change.
+ * back baseline, number below it. Positions in src/lib/kit.ts's
+ * JERSEY_LAYOUT are PLACEHOLDER — tuned by eye against this collection's
+ * real tribute back photos, not a verified blank plate. Re-tune once a
+ * real nameless back photo exists for any colorway; nothing else here
+ * needs to change. The Champions design never prints a number on the
+ * front, so there's no front overlay layer at all.
  */
 export function JerseyCanvas({
   view,
@@ -29,6 +38,7 @@ export function JerseyCanvas({
   backSrc,
   name,
   number,
+  showOverlay = true,
   fontFamily = "'Manrope', sans-serif",
 }: Props) {
   const [plate, setPlate] = useState<{ w: number; h: number } | null>(null);
@@ -41,7 +51,6 @@ export function JerseyCanvas({
   const numberBias = useInkBias(number || "8", fontFamily, 0) + (number.length === 1 ? 0.03 : 0);
 
   const showBack = view === "back";
-  const showFront = view === "front";
 
   const textStyle = {
     color: "var(--cream)",
@@ -71,7 +80,7 @@ export function JerseyCanvas({
     );
   }
 
-  const src = showFront ? frontSrc : (backSrc as string);
+  const src = view === "front" ? frontSrc : (backSrc as string);
 
   return (
     <figure
@@ -90,74 +99,55 @@ export function JerseyCanvas({
         }}
       />
 
-      <div className="pointer-events-none absolute inset-0" aria-hidden={!plate}>
-        {showBack && name ? (
-          <p
-            className="absolute flex items-end justify-center whitespace-nowrap text-center uppercase"
-            style={{
-              top: `${layout.name.y}%`,
-              left: `${layout.centerX}%`,
-              transform: `translateX(calc(-50% - ${nameBias}em)) scale(${nameFit})`,
-              transformOrigin: "center bottom",
-              width: `${layout.name.maxWidthPct}%`,
-              height: `${layout.name.heightPct}%`,
-              fontFamily,
-              fontWeight: 700,
-              fontSize: `calc(${layout.name.heightPct} * 1cqh)`,
-              letterSpacing: `${nameTracking}em`,
-              lineHeight: 0.9,
-              overflow: "visible",
-              ...textStyle,
-            }}
-          >
-            {name}
-          </p>
-        ) : null}
+      {showOverlay && (
+        <div className="pointer-events-none absolute inset-0" aria-hidden={!plate}>
+          {showBack && name ? (
+            <p
+              className="absolute flex items-end justify-center whitespace-nowrap text-center uppercase"
+              style={{
+                top: `${layout.name.y}%`,
+                left: `${layout.centerX}%`,
+                transform: `translateX(calc(-50% - ${nameBias}em)) scale(${nameFit})`,
+                transformOrigin: "center bottom",
+                width: `${layout.name.maxWidthPct}%`,
+                height: `${layout.name.heightPct}%`,
+                fontFamily,
+                fontWeight: 700,
+                fontSize: `calc(${layout.name.heightPct} * 1cqh)`,
+                letterSpacing: `${nameTracking}em`,
+                lineHeight: 0.9,
+                overflow: "visible",
+                ...textStyle,
+              }}
+            >
+              {name}
+            </p>
+          ) : null}
 
-        {showBack && number ? (
-          <p
-            className="absolute flex items-start justify-center whitespace-nowrap text-center"
-            style={{
-              top: `${layout.number.y}%`,
-              left: `${layout.centerX}%`,
-              transform: `translateX(calc(-50% - ${numberBias}em))`,
-              transformOrigin: "center top",
-              width: "max-content",
-              maxWidth: `${layout.number.maxWidthPct}%`,
-              height: `${layout.number.heightPct}%`,
-              fontFamily,
-              fontWeight: 700,
-              fontSize: `calc(${layout.number.heightPct} * 1cqh)`,
-              lineHeight: 0.85,
-              overflow: "visible",
-              ...textStyle,
-            }}
-          >
-            {number}
-          </p>
-        ) : null}
-
-        {showFront && number ? (
-          <p
-            className="absolute flex items-start justify-center whitespace-nowrap text-center"
-            style={{
-              top: `${layout.numberFront.y}%`,
-              left: `${layout.centerX}%`,
-              transform: `translateX(calc(-50% - ${numberBias}em))`,
-              width: "max-content",
-              maxWidth: `${layout.numberFront.maxWidthPct}%`,
-              height: `${layout.numberFront.heightPct}%`,
-              fontFamily,
-              fontWeight: 700,
-              fontSize: `calc(${layout.numberFront.heightPct} * 1cqh)`,
-              overflow: "visible",
-              ...textStyle,
-            }}
-          >
-            {number}
-          </p>
-        ) : null}
-      </div>
+          {showBack && number ? (
+            <p
+              className="absolute flex items-start justify-center whitespace-nowrap text-center"
+              style={{
+                top: `${layout.number.y}%`,
+                left: `${layout.centerX}%`,
+                transform: `translateX(calc(-50% - ${numberBias}em))`,
+                transformOrigin: "center top",
+                width: "max-content",
+                maxWidth: `${layout.number.maxWidthPct}%`,
+                height: `${layout.number.heightPct}%`,
+                fontFamily,
+                fontWeight: 700,
+                fontSize: `calc(${layout.number.heightPct} * 1cqh)`,
+                lineHeight: 0.85,
+                overflow: "visible",
+                ...textStyle,
+              }}
+            >
+              {number}
+            </p>
+          ) : null}
+        </div>
+      )}
     </figure>
   );
 }

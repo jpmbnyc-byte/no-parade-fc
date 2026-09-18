@@ -1,10 +1,11 @@
 import Stripe from "stripe";
-import { PERSONALIZED_PRICE, PRICE } from "../src/lib/kit";
+import { championById, priceFor, type ChampionId, type Mode } from "../src/lib/kit";
 
 export const config = { runtime: "edge" };
 
 type Body = {
-  nation: string;
+  championId: ChampionId;
+  mode: Mode;
   name: string;
   number: string;
 };
@@ -21,10 +22,18 @@ export default async function handler(req: Request): Promise<Response> {
   }
 
   const body = (await req.json()) as Body;
-  const personalized = Boolean(body.name && body.number);
-  const unitAmount = (personalized ? PERSONALIZED_PRICE : PRICE) * 100;
+  const champion = championById(body.championId);
+  const unitAmount = priceFor(body.mode) * 100;
 
-  const description = [body.nation, body.name && `Name: ${body.name}`, body.number && `# ${body.number}`]
+  const printedName = body.mode === "tribute" ? champion.legendName : body.mode === "custom" ? body.name : "";
+  const printedNumber =
+    body.mode === "tribute" ? champion.legendNumber : body.mode === "custom" ? body.number : "";
+
+  const description = [
+    `${champion.legendName} colorway — ${champion.colorLabel}`,
+    printedName && `Name: ${printedName}`,
+    printedNumber && `# ${printedNumber}`,
+  ]
     .filter(Boolean)
     .join(" · ");
 
@@ -51,16 +60,17 @@ export default async function handler(req: Request): Promise<Response> {
           currency: "usd",
           unit_amount: unitAmount,
           product_data: {
-            name: `No Parade F.C. — ${personalized ? "Personalized Jersey" : "Clean Jersey"}`,
+            name: `No Parade F.C. — The Champions — ${champion.colorLabel} (${body.mode})`,
             description,
           },
         },
       },
     ],
     metadata: {
-      nation: body.nation,
-      name: body.name,
-      number: body.number,
+      champion: body.championId,
+      mode: body.mode,
+      name: printedName,
+      number: printedNumber,
     },
     success_url: `${origin}/order/complete?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/order/cancel`,

@@ -8,7 +8,7 @@ export function OrderCancel() {
       </h1>
       <p className="mt-4 text-sm text-[var(--muted)]">Nothing was charged. Head back in and pick up where you left off.</p>
       <a href="/" className="mt-8 text-xs font-bold uppercase tracking-[0.14em] text-[var(--gold)]">
-        ← Back to Put Your Name On It
+        ← Back to The Champions
       </a>
     </main>
   );

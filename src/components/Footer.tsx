@@ -11,8 +11,7 @@ export function Footer({ onHome, onAbout, onBuild }: Props) {
         <div>
           <img src="/logo-white.png" alt="No Parade F.C." className="h-6 w-auto" />
           <p className="mt-4 max-w-xs text-xs leading-relaxed text-[var(--muted)]">
-            A jersey can carry a country. A name can carry a story. Peace
-            be with you.
+            Four legends. Four colors. One shirt. Peace be with you.
           </p>
         </div>
 
@@ -26,7 +25,7 @@ export function Footer({ onHome, onAbout, onBuild }: Props) {
               NPFC / PBWY
             </button>
             <button onClick={onBuild} className="text-left transition-colors hover:text-[var(--cream)]">
-              Put Your Name On It
+              The Champions
             </button>
           </div>
         </div>

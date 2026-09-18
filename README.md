@@ -1,34 +1,58 @@
-# No Parade F.C. — Put Your Name On It
+# No Parade F.C. — The Champions
 
-A working jersey customizer with a live overlay preview and Stripe
-checkout, replacing the frozen Shopify + Teeinblue listings. Standard
-name/number personalization only — no crest, motto, or heritage line;
-that flow was retired in favor of the exact working setup already
-proven on Bayonne Athletics' product page (`ba-athletics.com/team`).
+**The Champions — Release 01.** Four fixed colorways, each named for the
+legend who wore the number: Pelé 10 in Garnet, Robben 11 in Orange,
+Henry 12 in Powder Blue, Reyna 13 in Black. Each colorway sells three
+ways:
 
-The whole mechanic is ported from there, not just the overlay math:
+- **Tribute** — the legend's exact name and number, printed as shown.
+  Not editable.
+- **Blank** — the colorway with no name or number.
+- **Custom** — your own name and number, same personalization engine
+  as before.
+
+This replaces the nation-edition architecture (France/Jamaica/Haiti/
+USA) entirely — there is no more unlock roadmap; all four colorways
+are live from day one. Stripe checkout, live overlay preview for
+Custom mode.
+
+Legal note: printing real professional athletes' names/numbers
+commercially is a right-of-publicity and trademark exposure point
+without a license or estate agreement. That's a business decision
+outside this codebase, not something resolved by the code — flagging
+it here so it isn't missed before a real launch.
+
+The personalization mechanic (for Blank/Custom mode) is still the one
+ported from Bayonne Athletics' product page (`ba-athletics.com/team`):
 `src/components/JerseyCanvas.tsx` is Bayonne's `ProductCanvas.tsx`
-(percentage-of-plate lettering, canvas-based ink centering), and
-`src/components/Configurator.tsx` is the same single-panel PDP pattern
-as Bayonne's `team.$slug.$product.tsx` — a Gallery vs. "Put your name
-on it" toggle, front/back tabs, a number+name field pair, a confirm
-checkbox, and a dynamic clean-vs-personalized price — not the old
-5-step wizard.
+(percentage-of-plate lettering, canvas-based ink centering).
 
 ## Branding
 
 `public/logo.png` and `public/logo-white.png` are the real No Parade
-F.C. logo (trimmed, `logo-white.png` recolored for dark backgrounds —
-regenerate it from `logo.png` if the source art changes rather than
-hand-editing it). Used in the nav, footer, both order pages, and
-`public/favicon.png` (cropped to just the chevron mark). `public/og.jpg`
-is a built social-share card from the old Build Your Crest headline —
-due for a re-render now that the product is name/number only; the
-meta tags in `index.html` already point at the new copy.
+F.C. wordmark (trimmed, `logo-white.png` recolored for dark
+backgrounds — regenerate it from `logo.png` if the source art changes
+rather than hand-editing it), used in the nav, footer, and both order
+pages. `public/favicon.png` is cropped to just the chevron mark.
+
+`public/champions-hero.jpg` and `public/champions-<legend>-front.jpg`/
+`-back.jpg` (8 files: pele, robben, henry, reyna) are real product
+photography extracted at full resolution from "THE CHAMPIONS by No
+Parade FC" reference deck — not placeholders. Front plates never carry
+a name or number in this design (only the crest, `noparade` wordmark,
+and the Peace box); back plates in the extracted photos have the
+legend's tribute print already baked in, which is why Tribute mode
+renders them as a plain photo (`JerseyCanvas`'s `showOverlay={false}`)
+rather than compositing live text on top of them.
+
+`public/og.jpg` is a built social-share card from the old Build Your
+Crest headline — due for a re-render now that the product is The
+Champions; the meta tags in `index.html` already point at the new
+copy.
 
 Every nav item, footer link, and hero CTA is wired to something real:
 `Home` scrolls to top, `NPFC`/`PBWY`/`Explore NPFC` scroll to the "This
-is not merch" section, `Put Your Name On It`/`Collections`/the hero's
+is not merch" section, `The Champions`/`Collections`/the hero's
 primary CTA scroll to the configurator. There's no multi-page routing
 here (yet) — everything lives on the one page, so these are anchors,
 not separate destinations.
@@ -70,14 +94,13 @@ served by Vite's own static/dev server.)
 
 ## Pricing
 
-Same differential pattern as Bayonne's PDP: leave both fields blank
-for the clean jersey, fill in both for the personalized one.
+`src/lib/kit.ts`'s `priceFor(mode)` is the single source for both the
+UI and `api/create-checkout-session.ts` — the server always recomputes
+price from `mode`, never trusts a client-sent amount.
 
-- **Clean** — $118 (blank fields, no personalization)
-- **Personalized** — $138 (name + number both present and valid)
-
-`PRICE`/`PERSONALIZED_PRICE` in `src/lib/kit.ts` are the single source
-for both the UI and `api/create-checkout-session.ts`.
+- **Tribute** — $148 (the legend's exact print — the premium tier)
+- **Blank** — $118 (no name or number)
+- **Custom** — $138 (your own name + number, both required and valid)
 
 ## Pending assets — placeholders in place, need real files
 
@@ -85,42 +108,34 @@ Nothing below blocks the app from working end-to-end; it blocks the
 *preview* from being pixel-accurate. Swap these in and nothing else
 needs to change:
 
-- **Front plate.** `frontSrc` still points at the finished reference
-  mock (`public/france-front-placeholder.jpg`) — there's no real blank
-  France Edition front photo yet. Swap it in once a blank front exists;
-  `JERSEY_LAYOUT.numberFront` may need re-tuning against it.
-- **Back plate — real photo now in use.** `public/france-back.jpg` is
-  the actual France Edition back print (no name/number baked in), not
-  a placeholder — `JerseyCanvas.tsx`'s `!backSrc` fallback only fires
-  when a nation has no back photo at all (still true for Jamaica/USA).
-  Both source images have a visible checker pattern instead of real
-  transparency (flat RGB, not RGBA) — harmless behind the dark preview
-  panel, but worth a real cutout/transparent export if that bothers
-  anyone visually.
-- **Haiti Home — assets saved, not wired up yet.** `public/haiti-back.jpg`
-  (product-style back, confirmed the matching pair) and
-  `public/haiti-front-lifestyle.jpg` (a lifestyle/environmental shot,
-  not a flat product photo) are both real Haiti Home photography. The
-  Haiti entry in `NATIONS` (`src/lib/kit.ts`) is still `unlocked: false`
-  and `Configurator.tsx` still hardcodes the France assets, so neither
-  file is live anywhere yet. Before flipping Haiti on: the lifestyle
-  front photo isn't cropped to the garment the way France's front is,
-  so name/number overlay positions would need re-tuning against it
-  specifically (or swap in a flatter product-style front photo if one
-  exists, to match France's treatment).
-- **Brand typeface.** Jersey lettering currently renders in the UI's
-  own font (Manrope) rather than a licensed print face — same
-  "swap the font, nothing else changes" situation as Bayonne
-  Athletics' local OTF fonts.
+- **Blank back plates.** There is no nameless back photo for any of
+  the four colorways yet — only the tribute-baked ones extracted from
+  the reference deck. `JerseyCanvas.tsx` passes `backSrc={null}` for
+  Blank/Custom mode, so the back view falls back to the honest
+  "pending blank plate photography" placeholder (with a live text
+  preview of whatever name/number is typed) rather than showing real
+  photography with someone else's name still printed on it. Shoot a
+  blank back for each colorway and wire it into `Configurator.tsx`'s
+  `backSrc={mode === "tribute" ? champion.backSrc : null}` line once
+  available.
+- **`JERSEY_LAYOUT` geometry.** Tuned by eye against the real tribute
+  back photos (a real improvement over the old France-only guess), but
+  still not verified against an actual blank plate — re-check `name`/
+  `number` y/height/width percentages once real blank backs exist.
+  Front never needs a number layer in this design — none of the four
+  reference front photos carry one.
+- **Brand typeface.** Live overlay text (Blank/Custom mode) still
+  renders in the UI's own font (Manrope) rather than the "France WC
+  Font"-style diamond-tipped numeral face visible in the real tribute
+  photography — same "swap the font, nothing else changes" situation
+  as Bayonne Athletics' local OTF fonts.
 - **OG card.** `public/og.jpg` still carries the old Build Your Crest
-  headline — regenerate it against the new "Put Your Name On It" copy
-  once there's a moment for it; the site works fine without this.
-- **Other nations.** Jamaica, Haiti, and USA editions are wired into
-  `NATIONS` in `src/lib/kit.ts` as `unlocked: false` — add their kit
-  photography and flip the flag once each is ready.
+  headline — regenerate it against The Champions once there's a moment
+  for it; the site works fine without this.
 
 ## What checkout captures
 
-`api/create-checkout-session.ts` puts nation, name, and number into
-the Stripe Checkout Session's `metadata`, so it survives to the order
-and `order-summary` can read it back on the confirmation page.
+`api/create-checkout-session.ts` puts champion, mode, and (for Tribute/
+Custom) name and number into the Stripe Checkout Session's `metadata`,
+so it survives to the order and `order-summary` can read it back on
+the confirmation page.

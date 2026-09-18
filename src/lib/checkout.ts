@@ -1,5 +1,8 @@
+import type { ChampionId, Mode } from "@/lib/kit";
+
 export type CheckoutPayload = {
-  nation: string;
+  championId: ChampionId;
+  mode: Mode;
   name: string;
   number: string;
 };

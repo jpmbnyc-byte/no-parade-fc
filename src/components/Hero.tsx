@@ -19,7 +19,7 @@ export function Hero({ onHome, onAbout, onBuild }: Props) {
             NPFC
           </button>
           <button onClick={onBuild} className="text-[var(--gold)] transition-colors hover:text-[var(--cream)]">
-            Put Your Name On It
+            The Champions
           </button>
           <button onClick={onAbout} className="transition-colors hover:text-[var(--cream)]">
             PBWY
@@ -32,26 +32,28 @@ export function Hero({ onHome, onAbout, onBuild }: Props) {
 
       <div className="mx-auto grid max-w-[1400px] gap-10 px-6 py-16 sm:px-10 sm:py-20 lg:grid-cols-2 lg:items-center">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.28em] text-[var(--gold)]">Put Your Name On It</p>
+          <p className="text-xs font-bold uppercase tracking-[0.28em] text-[var(--gold)]">
+            The Champions — Release 01
+          </p>
           <h1
             className="mt-5 text-[clamp(2rem,4.6vw,3.4rem)] leading-[1.08]"
             style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
           >
-            Every kit needs a name.
+            Four legends. Four colors.
             <br />
-            Clean, or personalized.
+            One shirt.
           </h1>
           <p className="mt-6 max-w-md text-sm leading-relaxed text-[var(--muted)]">
-            A clean, customizable No Parade F.C. jersey — name and number,
-            country-coded, made for sport, street, faith, and memory.
-            Leave it blank for the clean edition, or put your name on it.
+            Built for the players who made the number mean something. Pelé 10 in Garnet, Robben
+            11 in Orange, Henry 12 in Powder Blue, Reyna 13 in Black — each a Tribute print, a
+            Blank shirt, or your own name and number in Custom.
           </p>
           <div className="mt-9 flex flex-wrap gap-4">
             <button
               onClick={onBuild}
               className="bg-[var(--gold)] px-7 py-3.5 text-xs font-bold uppercase tracking-[0.14em] text-[var(--ink)] transition-opacity hover:opacity-90"
             >
-              Start with France Edition →
+              Shop The Champions →
             </button>
             <button
               onClick={onAbout}
@@ -64,8 +66,8 @@ export function Hero({ onHome, onAbout, onBuild }: Props) {
 
         <div className="overflow-hidden rounded-sm bg-[var(--panel)]">
           <img
-            src="/france-front-placeholder.jpg"
-            alt="No Parade F.C. France Edition jersey"
+            src="/champions-hero.jpg"
+            alt="Four No Parade F.C. Champions jerseys — Pelé 10 Garnet, Robben 11 Orange, Henry 12 Powder Blue, Reyna 13 Black"
             className="h-full w-full object-cover"
           />
         </div>

@@ -38,7 +38,7 @@ export default async function handler(req: Request): Promise<Response> {
     paid: session.payment_status === "paid",
     email: session.customer_details?.email ?? session.customer_email ?? null,
     productName: session.line_items?.data[0]?.description ?? "No Parade F.C.",
-    description: [meta["name"], meta["number"] && `# ${meta["number"]}`, meta["nation"]]
+    description: [meta["name"], meta["number"] && `# ${meta["number"]}`, meta["champion"]]
       .filter(Boolean)
       .join(" · "),
     amountTotal: session.amount_total,
