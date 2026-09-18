@@ -106,7 +106,7 @@ export function JerseyCanvas({
               className="absolute flex items-end justify-center whitespace-nowrap text-center uppercase"
               style={{
                 top: `${layout.name.y}%`,
-                left: `${layout.centerX}%`,
+                left: `${layout.name.centerX}%`,
                 transform: `translateX(calc(-50% - ${nameBias}em)) scale(${nameFit})`,
                 transformOrigin: "center bottom",
                 width: `${layout.name.maxWidthPct}%`,
@@ -129,7 +129,7 @@ export function JerseyCanvas({
               className="absolute flex items-start justify-center whitespace-nowrap text-center"
               style={{
                 top: `${layout.number.y}%`,
-                left: `${layout.centerX}%`,
+                left: `${layout.number.centerX}%`,
                 transform: `translateX(calc(-50% - ${numberBias}em))`,
                 transformOrigin: "center top",
                 width: "max-content",

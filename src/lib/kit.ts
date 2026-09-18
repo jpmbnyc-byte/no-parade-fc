@@ -113,22 +113,26 @@ export function priceFor(mode: Mode): number {
  * Percentage-based overlay geometry on the blank jersey plate — mirrors
  * Bayonne Athletics' LetteringLayout. Only used in Blank/Custom mode
  * (Tribute mode renders the real baked-in photo, no live overlay).
- * Calibrated against the real blank back plates (`blankBackSrc`) by
- * comparing collar-to-hem landmark positions against where PELÉ/10
- * actually sits in the tribute photo of the same garment — closer than
- * a pure guess, but still not pixel-measured against a print spec, so
- * treat as a strong placeholder rather than final.
+ *
+ * The blank plates are shot at a turned 3/4 angle, not flat-on, so the
+ * garment's true print centerline isn't a single fixed x% — it drifts
+ * with height. Pixel-measuring the actual dark-panel bounds at each
+ * band (name sits right where the side-piping stripe crosses through,
+ * pulling its visual centerline right; the number sits lower, past
+ * where the piping has already curved out of frame, closer to true
+ * center) gave two different centerX values, so `name` and `number`
+ * each carry their own rather than sharing one. Re-check both if the
+ * source photography changes — this is measured against the specific
+ * blank plates in this repo, not a general formula.
  */
 export type JerseyLayout = {
-  centerX: number;
-  name: { y: number; heightPct: number; maxWidthPct: number };
-  number: { y: number; heightPct: number; maxWidthPct: number };
+  name: { centerX: number; y: number; heightPct: number; maxWidthPct: number };
+  number: { centerX: number; y: number; heightPct: number; maxWidthPct: number };
 };
 
 export const JERSEY_LAYOUT: JerseyLayout = {
-  centerX: 50,
-  name: { y: 13, heightPct: 7, maxWidthPct: 70 },
-  number: { y: 24, heightPct: 30, maxWidthPct: 50 },
+  name: { centerX: 58, y: 13, heightPct: 7, maxWidthPct: 70 },
+  number: { centerX: 52, y: 24, heightPct: 30, maxWidthPct: 50 },
 };
 
 /**

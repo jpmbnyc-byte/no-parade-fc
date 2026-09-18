@@ -121,14 +121,15 @@ Nothing below blocks the app from working end-to-end; it blocks the
 *preview* from being pixel-accurate. Swap these in and nothing else
 needs to change:
 
-- **`JERSEY_LAYOUT` geometry.** Calibrated by comparing landmark
-  positions (collar dip, hem) between the real blank plates and the
-  tribute photos of the same garment — real progress over a pure
-  guess, but still not pixel-measured against an actual print spec.
-  Nudge `name`/`number` y/height/width percentages in `src/lib/kit.ts`
-  if a real Custom order comes back misaligned. Front never needs a
-  number layer in this design — none of the four reference front
-  photos carry one.
+- **`JERSEY_LAYOUT` geometry.** Pixel-measured against the real blank
+  plates (dark-panel bounds at each row, not eyeballed) — the plates
+  are shot at a turned 3/4 angle rather than flat-on, so the garment's
+  true print centerline drifts with height, which is why `name` and
+  `number` each carry their own `centerX` instead of sharing one. Real
+  progress over a pure guess, but still not verified against an actual
+  print spec — nudge `src/lib/kit.ts` if a real Custom order comes back
+  misaligned. Front never needs a number layer in this design — none
+  of the four reference front photos carry one.
 - **OG card.** `public/og.jpg` still carries the old Build Your Crest
   headline — regenerate it against The Champions once there's a moment
   for it; the site works fine without this.
