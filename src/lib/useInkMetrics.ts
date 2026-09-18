@@ -1,20 +1,32 @@
 import { useEffect, useState } from "react";
 
+export type InkMetrics = {
+  /**
+   * How far glyph *ink* sits to the right of the CSS layout box center, in em.
+   * Positive -> shift left so painted strokes land back on the layout center.
+   */
+  biasEm: number;
+  /** Painted width of the string, in em. Used to scale long names down to fit the print area. */
+  widthEm: number;
+};
+
+const FALLBACK: InkMetrics = { biasEm: 0.02, widthEm: 0 };
+
 /**
- * How far glyph *ink* sits to the right of the CSS layout box center, in em.
- * Positive -> shift left so painted strokes land back on the layout center.
- * Ported from Bayonne Athletics' ProductCanvas.tsx ink-bias measurement —
- * same technique, generalized to any overlay text (name, number, year).
+ * Measures painted glyph ink for overlay text. Ported from Bayonne Athletics'
+ * ProductCanvas.tsx ink-bias measurement — same offscreen-canvas technique,
+ * extended to also report ink width so the name can be scaled to the plate's
+ * print area exactly rather than guessed from character count.
  */
-export function useInkBias(text: string, fontFamily: string, letterSpacingEm: number, fallback = 0.02) {
-  const [biasEm, setBiasEm] = useState(fallback);
+export function useInkMetrics(text: string, fontFamily: string, letterSpacingEm: number): InkMetrics {
+  const [metrics, setMetrics] = useState<InkMetrics>(FALLBACK);
 
   useEffect(() => {
     let cancelled = false;
 
     const measure = () => {
       if (cancelled || typeof document === "undefined" || !text) {
-        if (!cancelled) setBiasEm(fallback);
+        if (!cancelled) setMetrics(FALLBACK);
         return;
       }
       const fontSize = 180;
@@ -22,14 +34,14 @@ export function useInkBias(text: string, fontFamily: string, letterSpacingEm: nu
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d", { willReadFrequently: true });
       if (!ctx) {
-        setBiasEm(fallback);
+        setMetrics(FALLBACK);
         return;
       }
       ctx.font = `${fontSize}px ${fontFamily}`;
       ctx.letterSpacing = `${letterSpacingEm}em`;
       const layoutW = Math.ceil(ctx.measureText(text).width);
       if (layoutW < 2) {
-        setBiasEm(fallback);
+        setMetrics(FALLBACK);
         return;
       }
       canvas.width = layoutW + pad * 2;
@@ -53,13 +65,17 @@ export function useInkBias(text: string, fontFamily: string, letterSpacingEm: nu
         }
       }
       if (inkRight <= inkLeft) {
-        setBiasEm(fallback);
+        setMetrics(FALLBACK);
         return;
       }
       const inkMid = (inkLeft + inkRight) / 2;
       const layoutMid = pad + layoutW / 2;
-      const measured = (inkMid - layoutMid) / fontSize;
-      setBiasEm(Number.isFinite(measured) ? measured : fallback);
+      const biasEm = (inkMid - layoutMid) / fontSize;
+      const widthEm = (inkRight - inkLeft + 1) / fontSize;
+      setMetrics({
+        biasEm: Number.isFinite(biasEm) ? biasEm : FALLBACK.biasEm,
+        widthEm: Number.isFinite(widthEm) ? widthEm : FALLBACK.widthEm,
+      });
     };
 
     const run = () => {
@@ -73,7 +89,7 @@ export function useInkBias(text: string, fontFamily: string, letterSpacingEm: nu
     return () => {
       cancelled = true;
     };
-  }, [text, fontFamily, letterSpacingEm, fallback]);
+  }, [text, fontFamily, letterSpacingEm]);
 
-  return biasEm;
+  return metrics;
 }

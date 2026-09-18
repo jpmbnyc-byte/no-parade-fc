@@ -9,7 +9,7 @@
  * (your own name + number, same personalization engine as before).
  */
 
-export const NAME_MAX = 12;
+export const NAME_MAX = 15;
 export const NUMBER_MIN = 0;
 export const NUMBER_MAX = 99;
 
@@ -110,29 +110,30 @@ export function priceFor(mode: Mode): number {
 }
 
 /**
- * Percentage-based overlay geometry on the blank jersey plate — mirrors
- * Bayonne Athletics' LetteringLayout. Only used in Blank/Custom mode
- * (Tribute mode renders the real baked-in photo, no live overlay).
+ * Percentage-of-plate overlay geometry, used only in Blank/Custom mode
+ * (Tribute renders the real baked-in print photo, no live overlay).
  *
- * The blank plates are shot at a turned 3/4 angle, not flat-on, so the
- * garment's true print centerline isn't a single fixed x% — it drifts
- * with height. Pixel-measuring the actual dark-panel bounds at each
- * band (name sits right where the side-piping stripe crosses through,
- * pulling its visual centerline right; the number sits lower, past
- * where the piping has already curved out of frame, closer to true
- * center) gave two different centerX values, so `name` and `number`
- * each carry their own rather than sharing one. Re-check both if the
- * source photography changes — this is measured against the specific
- * blank plates in this repo, not a general formula.
+ * These are not eyeballed. The tribute photos and the blank plates are
+ * the same product shot — one printed, one not — so the tribute print's
+ * painted ink box was measured, mapped into the blank plate's frame via
+ * the garment bounding box, and the CSS was then calibrated by rendering
+ * and re-measuring until the live overlay landed on that same box. See
+ * the README. `name` and `number` carry their own `centerX` because the
+ * plates are shot at a turned 3/4 angle, so the print centerline is not
+ * one fixed x% down the whole plate.
+ *
+ * Every value is a percentage of the square plate: `y` is the top of the
+ * text line box, `heightPct` is the font size, `maxWidthPct` is the
+ * widest the painted name may get before it is scaled down to fit.
  */
 export type JerseyLayout = {
-  name: { centerX: number; y: number; heightPct: number; maxWidthPct: number };
-  number: { centerX: number; y: number; heightPct: number; maxWidthPct: number };
+  name: { centerX: number; y: number; heightPct: number; maxWidthPct: number; trackingEm: number };
+  number: { centerX: number; y: number; heightPct: number; trackingEm: number };
 };
 
 export const JERSEY_LAYOUT: JerseyLayout = {
-  name: { centerX: 58, y: 13, heightPct: 7, maxWidthPct: 70 },
-  number: { centerX: 52, y: 24, heightPct: 30, maxWidthPct: 50 },
+  name: { centerX: 55.67, y: 16.2, heightPct: 10.07, maxWidthPct: 30, trackingEm: 0.059 },
+  number: { centerX: 54.79, y: 23.57, heightPct: 38.29, trackingEm: 0.088 },
 };
 
 /**
@@ -181,8 +182,8 @@ const BLOCKLIST = new Set(
 export function validateBuild(input: { name: string; number: string }): FieldIssue[] {
   const issues: FieldIssue[] = [];
   const name = sanitizeName(input.name);
-  if (name.length > 0 && !/^[\p{L}][\p{L} '\-]{0,11}$/u.test(name)) {
-    issues.push({ field: "name", message: "Letters, space, hyphen, apostrophe only. Max 12." });
+  if (name.length > 0 && !/^[\p{L}][\p{L} '\-]{0,14}$/u.test(name)) {
+    issues.push({ field: "name", message: `Letters, space, hyphen, apostrophe only. Max ${NAME_MAX}.` });
   }
   if (BLOCKLIST.has(name.replace(/[\s'-]/g, ""))) {
     issues.push({ field: "name", message: "That name cannot be printed." });

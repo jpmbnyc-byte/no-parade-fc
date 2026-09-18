@@ -58,6 +58,39 @@ as `JERSEY_FONT_FAMILY`, the default font for the live overlay in
 Blank/Custom mode. Tribute mode never uses it, since that print is
 baked into the real photo.
 
+## How the custom overlay is calibrated
+
+Custom input is meant to land exactly where the tribute print lands,
+and `JERSEY_LAYOUT` in `src/lib/kit.ts` is derived rather than
+eyeballed. The tribute photo and the blank plate are the same product
+shot — one printed, one not — so:
+
+1. The painted ink box of the tribute print (`ROBBEN` / `11`) was
+   measured out of the tribute photo.
+2. That box was mapped into the blank plate's frame using each photo's
+   garment bounding box (the two exports differ by ~2.7% in scale).
+3. The live overlay was then rendered and re-measured — by diffing a
+   Custom-mode screenshot against a Blank-mode screenshot of the same
+   plate, which isolates the overlay exactly — and the CSS was solved
+   against the target box, iterating until every edge landed within a
+   pixel.
+
+Two consequences worth keeping:
+
+- The figure is `aspect-square`. Every plate photo is square, so with
+  `object-contain` a percentage in `JERSEY_LAYOUT` maps 1:1 onto the
+  photo. Any other container ratio letterboxes the photo and silently
+  shifts every overlay position.
+- `name` and `number` carry their own `centerX` and `trackingEm`. The
+  plates are shot at a turned 3/4 angle, so the print centerline is
+  not one fixed x% down the whole plate, and the real print is set
+  looser than the font's default spacing.
+
+Long names scale to fit: `useInkMetrics` measures the painted width on
+an offscreen canvas and the overlay scales down once it would exceed
+`name.maxWidthPct` (30% of the plate — the panel width at print height,
+before the raglan seam). Names are capped at `NAME_MAX` (15).
+
 `public/og.jpg` is a built social-share card from the old Build Your
 Crest headline — due for a re-render now that the product is The
 Champions; the meta tags in `index.html` already point at the new
@@ -121,18 +154,9 @@ Nothing below blocks the app from working end-to-end; it blocks the
 *preview* from being pixel-accurate. Swap these in and nothing else
 needs to change:
 
-- **`JERSEY_LAYOUT` geometry.** Pixel-measured against the real blank
-  plates (dark-panel bounds at each row, not eyeballed) — the plates
-  are shot at a turned 3/4 angle rather than flat-on, so the garment's
-  true print centerline drifts with height, which is why `name` and
-  `number` each carry their own `centerX` instead of sharing one. Real
-  progress over a pure guess, but still not verified against an actual
-  print spec — nudge `src/lib/kit.ts` if a real Custom order comes back
-  misaligned. Front never needs a number layer in this design — none
-  of the four reference front photos carry one.
 - **OG card.** `public/og.jpg` still carries the old Build Your Crest
-  headline — regenerate it against The Champions once there's a moment
-  for it; the site works fine without this.
+  headline — regenerate it against The Champions when there's a moment;
+  the site works fine without it.
 
 ## What checkout captures
 

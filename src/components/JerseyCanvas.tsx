@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { JERSEY_FONT_FAMILY, JERSEY_LAYOUT } from "@/lib/kit";
-import { useInkBias } from "@/lib/useInkBias";
+import { useInkMetrics } from "@/lib/useInkMetrics";
 
 export type CanvasView = "front" | "back";
 
 type Props = {
   view: CanvasView;
   frontSrc: string;
-  /** No real blank back plate exists yet — null renders an honest placeholder instead of a fake photo. */
+  /** null renders an honest placeholder instead of a fake photo. */
   backSrc: string | null;
   name: string;
   number: string;
@@ -24,13 +24,17 @@ type Props = {
 
 /**
  * Live overlay preview — ported from Bayonne Athletics' ProductCanvas.tsx:
- * percentage-of-plate lettering, canvas ink-bias centering, name on the
- * back baseline, number below it. Defaults to the real "France WC 2026
- * Away" jersey face (registered in styles.css) rather than a UI font.
- * Positions in src/lib/kit.ts's JERSEY_LAYOUT are calibrated against the
- * real blank back plates but still approximate — see that constant's
- * comment. The Champions design never prints a number on the front, so
- * there's no front overlay layer at all.
+ * percentage-of-plate lettering, canvas ink measurement, name above number
+ * on the back. Renders in the real "France WC 2026 Away" jersey face.
+ *
+ * The figure is deliberately `aspect-square` because every plate photo in
+ * this collection is square: with `object-contain`, a square image inside
+ * a square box fills it exactly, so a percentage in JERSEY_LAYOUT maps 1:1
+ * onto the photo. Any other container ratio letterboxes the photo and
+ * silently shifts every overlay position away from the print area.
+ *
+ * The Champions design never prints a number on the front, so there's no
+ * front overlay layer at all.
  */
 export function JerseyCanvas({
   view,
@@ -44,36 +48,27 @@ export function JerseyCanvas({
   const [plate, setPlate] = useState<{ w: number; h: number } | null>(null);
   const layout = JERSEY_LAYOUT;
 
-  const nameChars = Math.max(name.replace(/\s/g, "").length, 1);
-  const nameTracking = nameChars >= 10 ? 0.01 : nameChars >= 7 ? 0.035 : 0.06;
-  const nameFit = Math.min(1, 8 / nameChars);
-  const nameBias = useInkBias(name || "A", fontFamily, nameTracking);
-  const numberBias = useInkBias(number || "8", fontFamily, 0) + (number.length === 1 ? 0.03 : 0);
+  const nameTracking = layout.name.trackingEm;
+  const numberTracking = layout.number.trackingEm;
+  const nameInk = useInkMetrics(name || "A", fontFamily, nameTracking);
+  const numberInk = useInkMetrics(number || "8", fontFamily, numberTracking);
+
+  // Ink width as a percentage of the plate, at scale 1 (font size is a
+  // percentage of the square container, so em * heightPct == plate %).
+  const namePlateWidthPct = nameInk.widthEm * layout.name.heightPct;
+  const nameFit =
+    namePlateWidthPct > 0 ? Math.min(1, layout.name.maxWidthPct / namePlateWidthPct) : 1;
 
   const showBack = view === "back";
 
-  const textStyle = {
-    color: "var(--cream)",
-    WebkitTextStroke: "0.04em rgba(10,13,19,0.85)",
-    paintOrder: "stroke fill" as const,
-  };
+  // Matches the tribute print: solid white, no keyline. The numeral's inner
+  // spine detail comes from the France WC face itself, not from a stroke.
+  const textStyle = { color: "#ffffff" };
 
   if (showBack && !backSrc) {
     return (
-      <figure className="relative flex aspect-[4/5] w-full flex-col items-center justify-center gap-3 overflow-hidden rounded-sm border border-dashed border-[var(--panel-line)] bg-[var(--panel)] px-8 text-center">
-        <div className="pointer-events-none absolute inset-0" aria-hidden>
-          {name ? (
-            <p className="absolute left-1/2 top-[16%] w-[70%] -translate-x-1/2 text-center text-4xl font-bold uppercase text-[var(--muted)]">
-              {name}
-            </p>
-          ) : null}
-          {number ? (
-            <p className="absolute left-1/2 top-[26%] -translate-x-1/2 text-center text-8xl font-bold text-[var(--muted)]">
-              {number}
-            </p>
-          ) : null}
-        </div>
-        <p className="relative text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
+      <figure className="relative flex aspect-square w-full flex-col items-center justify-center gap-3 overflow-hidden rounded-sm border border-dashed border-[var(--panel-line)] bg-[var(--panel)] px-8 text-center">
+        <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
           Back view — pending blank plate photography
         </p>
       </figure>
@@ -84,7 +79,7 @@ export function JerseyCanvas({
 
   return (
     <figure
-      className="relative aspect-[4/5] w-full overflow-hidden rounded-sm bg-[var(--panel)]"
+      className="relative aspect-square w-full overflow-hidden rounded-sm bg-[var(--panel)]"
       style={{ containerType: "size" }}
     >
       <img
@@ -103,20 +98,18 @@ export function JerseyCanvas({
         <div className="pointer-events-none absolute inset-0" aria-hidden={!plate}>
           {showBack && name ? (
             <p
-              className="absolute flex items-end justify-center whitespace-nowrap text-center uppercase"
+              data-overlay="name"
+              className="absolute m-0 whitespace-nowrap text-center uppercase"
               style={{
                 top: `${layout.name.y}%`,
                 left: `${layout.name.centerX}%`,
-                transform: `translateX(calc(-50% - ${nameBias}em)) scale(${nameFit})`,
-                transformOrigin: "center bottom",
-                width: `${layout.name.maxWidthPct}%`,
-                height: `${layout.name.heightPct}%`,
+                transform: `translate(calc(-50% - ${nameInk.biasEm}em), 0) scale(${nameFit})`,
+                transformOrigin: "center top",
                 fontFamily,
-                fontWeight: 700,
+                fontWeight: 400,
                 fontSize: `calc(${layout.name.heightPct} * 1cqh)`,
                 letterSpacing: `${nameTracking}em`,
-                lineHeight: 0.9,
-                overflow: "visible",
+                lineHeight: 1,
                 ...textStyle,
               }}
             >
@@ -126,20 +119,18 @@ export function JerseyCanvas({
 
           {showBack && number ? (
             <p
-              className="absolute flex items-start justify-center whitespace-nowrap text-center"
+              data-overlay="number"
+              className="absolute m-0 whitespace-nowrap text-center"
               style={{
                 top: `${layout.number.y}%`,
                 left: `${layout.number.centerX}%`,
-                transform: `translateX(calc(-50% - ${numberBias}em))`,
+                transform: `translate(calc(-50% - ${numberInk.biasEm}em), 0)`,
                 transformOrigin: "center top",
-                width: "max-content",
-                maxWidth: `${layout.number.maxWidthPct}%`,
-                height: `${layout.number.heightPct}%`,
                 fontFamily,
-                fontWeight: 700,
+                fontWeight: 400,
                 fontSize: `calc(${layout.number.heightPct} * 1cqh)`,
-                lineHeight: 0.85,
-                overflow: "visible",
+                letterSpacing: `${numberTracking}em`,
+                lineHeight: 1,
                 ...textStyle,
               }}
             >
