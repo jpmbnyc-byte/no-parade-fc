@@ -27,6 +27,8 @@ export type Champion = {
   frontSrc: string;
   /** Real photo of the tribute print — legend's name/number already baked in. */
   backSrc: string;
+  /** Real nameless back photo — used for Blank mode and as the live-overlay plate in Custom mode. */
+  blankBackSrc: string;
 };
 
 export const CHAMPIONS: Champion[] = [
@@ -41,6 +43,7 @@ export const CHAMPIONS: Champion[] = [
     bio: "Pelé represents football at its most universal. He became a World Cup winner at 17 and remains the only player to win three World Cups. But the legacy goes beyond trophies: Pelé turned the No. 10 into a symbol of imagination, excellence and possibility. This jersey honors the player who helped make football a global language.",
     frontSrc: "/champions-pele-front.jpg",
     backSrc: "/champions-pele-back.jpg",
+    blankBackSrc: "/champions-pele-back-blank.jpg",
   },
   {
     id: "robben",
@@ -53,6 +56,7 @@ export const CHAMPIONS: Champion[] = [
     bio: "Arjen Robben built a career around one unmistakable idea: give him the ball and make him stop you. Pace, precision and relentless confidence defined his game. From the Netherlands to the biggest nights in European football, Robben made the No. 11 feel like an instrument of attack — direct, recognizable and impossible to ignore.",
     frontSrc: "/champions-robben-front.jpg",
     backSrc: "/champions-robben-back.jpg",
+    blankBackSrc: "/champions-robben-back-blank.jpg",
   },
   {
     id: "henry",
@@ -65,6 +69,7 @@ export const CHAMPIONS: Champion[] = [
     bio: "Thierry Henry made elegance look dangerous. His combination of speed, intelligence and finishing helped define a generation of football, from France's World Cup triumph to his dominance at club level. The No. 12 becomes a tribute to a player who showed that power doesn't always have to announce itself.",
     frontSrc: "/champions-henry-front.jpg",
     backSrc: "/champions-henry-back.jpg",
+    blankBackSrc: "/champions-henry-back-blank.jpg",
   },
   {
     id: "reyna",
@@ -77,6 +82,7 @@ export const CHAMPIONS: Champion[] = [
     bio: "Claudio Reyna represented a different kind of excellence — control, vision and intelligence. A central figure for the United States across a major era of international football, he helped establish a standard for American players competing on the world stage. No. 13 becomes a marker of influence: the player who could change a match without needing to dominate the spotlight.",
     frontSrc: "/champions-reyna-front.jpg",
     backSrc: "/champions-reyna-back.jpg",
+    blankBackSrc: "/champions-reyna-back-blank.jpg",
   },
 ];
 
@@ -107,10 +113,11 @@ export function priceFor(mode: Mode): number {
  * Percentage-based overlay geometry on the blank jersey plate — mirrors
  * Bayonne Athletics' LetteringLayout. Only used in Blank/Custom mode
  * (Tribute mode renders the real baked-in photo, no live overlay).
- * PLACEHOLDER geometry, tuned by eye against the real tribute back
- * photos in this collection — not a verified blank plate, since no
- * nameless back photo exists yet for any of the four colorways. See
- * README "Pending assets".
+ * Calibrated against the real blank back plates (`blankBackSrc`) by
+ * comparing collar-to-hem landmark positions against where PELÉ/10
+ * actually sits in the tribute photo of the same garment — closer than
+ * a pure guess, but still not pixel-measured against a print spec, so
+ * treat as a strong placeholder rather than final.
  */
 export type JerseyLayout = {
   centerX: number;
@@ -120,9 +127,19 @@ export type JerseyLayout = {
 
 export const JERSEY_LAYOUT: JerseyLayout = {
   centerX: 50,
-  name: { y: 15, heightPct: 6, maxWidthPct: 70 },
+  name: { y: 13, heightPct: 7, maxWidthPct: 70 },
   number: { y: 24, heightPct: 30, maxWidthPct: 50 },
 };
+
+/**
+ * Real licensed-style jersey numeral/lettering face (the "France WC
+ * Font" referenced in the reference deck), covering A–Z, 0–9, and
+ * accented characters (é for PELÉ). Registered in styles.css via
+ * @font-face. Default lettering face for the live overlay in
+ * Blank/Custom mode — Tribute mode never uses it since that print is
+ * already baked into the real photo.
+ */
+export const JERSEY_FONT_FAMILY = "'France WC 2026', 'Manrope', sans-serif";
 
 export function sanitizeName(raw: string): string {
   return raw

@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "France WC 2026";
+  src: url("/fonts/france-wc-2026-away.otf") format("opentype");
+  font-weight: 700;
+  font-display: swap;
+}
+
 :root {
   --ink: #0a0d13;
   --panel: #12161e;

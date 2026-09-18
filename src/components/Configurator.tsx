@@ -140,7 +140,7 @@ export const Configurator = forwardRef<HTMLDivElement>(function Configurator(_pr
           <JerseyCanvas
             view={view}
             frontSrc={champion.frontSrc}
-            backSrc={mode === "tribute" ? champion.backSrc : null}
+            backSrc={mode === "tribute" ? champion.backSrc : champion.blankBackSrc}
             name={effectiveName}
             number={effectiveNumber}
             showOverlay={mode !== "tribute"}

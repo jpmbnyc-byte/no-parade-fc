@@ -40,10 +40,23 @@ pages. `public/favicon.png` is cropped to just the chevron mark.
 photography extracted at full resolution from "THE CHAMPIONS by No
 Parade FC" reference deck — not placeholders. Front plates never carry
 a name or number in this design (only the crest, `noparade` wordmark,
-and the Peace box); back plates in the extracted photos have the
-legend's tribute print already baked in, which is why Tribute mode
-renders them as a plain photo (`JerseyCanvas`'s `showOverlay={false}`)
-rather than compositing live text on top of them.
+and the Peace box); back plates in these 8 files have the legend's
+tribute print already baked in, which is why Tribute mode renders them
+as a plain photo (`JerseyCanvas`'s `showOverlay={false}`) rather than
+compositing live text on top of them.
+
+`public/champions-<legend>-back-blank.jpg` (4 files) are real nameless
+back photography for all four colorways — the plate Blank mode shows
+as-is, and the plate Custom mode overlays the typed name/number onto
+live. Same camera angle and crop as the tribute back photos, so
+`JERSEY_LAYOUT` (`src/lib/kit.ts`) applies to both consistently.
+
+`public/fonts/france-wc-2026-away.otf` ("France WC 2026 Away") is the
+real jersey lettering face — full A–Z, 0–9, and accented coverage
+(é, for PELÉ) — registered via `@font-face` in `styles.css` and used
+as `JERSEY_FONT_FAMILY`, the default font for the live overlay in
+Blank/Custom mode. Tribute mode never uses it, since that print is
+baked into the real photo.
 
 `public/og.jpg` is a built social-share card from the old Build Your
 Crest headline — due for a re-render now that the product is The
@@ -108,27 +121,14 @@ Nothing below blocks the app from working end-to-end; it blocks the
 *preview* from being pixel-accurate. Swap these in and nothing else
 needs to change:
 
-- **Blank back plates.** There is no nameless back photo for any of
-  the four colorways yet — only the tribute-baked ones extracted from
-  the reference deck. `JerseyCanvas.tsx` passes `backSrc={null}` for
-  Blank/Custom mode, so the back view falls back to the honest
-  "pending blank plate photography" placeholder (with a live text
-  preview of whatever name/number is typed) rather than showing real
-  photography with someone else's name still printed on it. Shoot a
-  blank back for each colorway and wire it into `Configurator.tsx`'s
-  `backSrc={mode === "tribute" ? champion.backSrc : null}` line once
-  available.
-- **`JERSEY_LAYOUT` geometry.** Tuned by eye against the real tribute
-  back photos (a real improvement over the old France-only guess), but
-  still not verified against an actual blank plate — re-check `name`/
-  `number` y/height/width percentages once real blank backs exist.
-  Front never needs a number layer in this design — none of the four
-  reference front photos carry one.
-- **Brand typeface.** Live overlay text (Blank/Custom mode) still
-  renders in the UI's own font (Manrope) rather than the "France WC
-  Font"-style diamond-tipped numeral face visible in the real tribute
-  photography — same "swap the font, nothing else changes" situation
-  as Bayonne Athletics' local OTF fonts.
+- **`JERSEY_LAYOUT` geometry.** Calibrated by comparing landmark
+  positions (collar dip, hem) between the real blank plates and the
+  tribute photos of the same garment — real progress over a pure
+  guess, but still not pixel-measured against an actual print spec.
+  Nudge `name`/`number` y/height/width percentages in `src/lib/kit.ts`
+  if a real Custom order comes back misaligned. Front never needs a
+  number layer in this design — none of the four reference front
+  photos carry one.
 - **OG card.** `public/og.jpg` still carries the old Build Your Crest
   headline — regenerate it against The Champions once there's a moment
   for it; the site works fine without this.

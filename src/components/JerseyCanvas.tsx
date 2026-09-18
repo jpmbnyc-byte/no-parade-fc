@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { JERSEY_LAYOUT } from "@/lib/kit";
+import { JERSEY_FONT_FAMILY, JERSEY_LAYOUT } from "@/lib/kit";
 import { useInkBias } from "@/lib/useInkBias";
 
 export type CanvasView = "front" | "back";
@@ -25,12 +25,12 @@ type Props = {
 /**
  * Live overlay preview — ported from Bayonne Athletics' ProductCanvas.tsx:
  * percentage-of-plate lettering, canvas ink-bias centering, name on the
- * back baseline, number below it. Positions in src/lib/kit.ts's
- * JERSEY_LAYOUT are PLACEHOLDER — tuned by eye against this collection's
- * real tribute back photos, not a verified blank plate. Re-tune once a
- * real nameless back photo exists for any colorway; nothing else here
- * needs to change. The Champions design never prints a number on the
- * front, so there's no front overlay layer at all.
+ * back baseline, number below it. Defaults to the real "France WC 2026
+ * Away" jersey face (registered in styles.css) rather than a UI font.
+ * Positions in src/lib/kit.ts's JERSEY_LAYOUT are calibrated against the
+ * real blank back plates but still approximate — see that constant's
+ * comment. The Champions design never prints a number on the front, so
+ * there's no front overlay layer at all.
  */
 export function JerseyCanvas({
   view,
@@ -39,7 +39,7 @@ export function JerseyCanvas({
   name,
   number,
   showOverlay = true,
-  fontFamily = "'Manrope', sans-serif",
+  fontFamily = JERSEY_FONT_FAMILY,
 }: Props) {
   const [plate, setPlate] = useState<{ w: number; h: number } | null>(null);
   const layout = JERSEY_LAYOUT;
