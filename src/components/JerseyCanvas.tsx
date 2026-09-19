@@ -79,7 +79,9 @@ export function JerseyCanvas({
 
   return (
     <figure
-      className="relative aspect-square w-full overflow-hidden rounded-sm bg-[var(--panel)]"
+      // No panel fill or frame: the plates are knocked out, so the garment
+      // floats directly on the page instead of sitting in a box.
+      className="relative aspect-square w-full"
       style={{ containerType: "size" }}
     >
       <img

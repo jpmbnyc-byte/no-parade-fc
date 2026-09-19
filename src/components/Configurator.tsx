@@ -181,17 +181,28 @@ export const Configurator = forwardRef<HTMLDivElement>(function Configurator(_pr
         </div>
 
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
-            LEGEND / ICON / CHAMPION
+          <p className="text-[0.65rem] font-bold uppercase tracking-[0.3em] text-[var(--muted)]">
+            Legend / Icon / Champion
           </p>
-          <div className="mt-2 flex items-baseline justify-between gap-4">
-            <h3 className="text-2xl" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>
-              {champion.legendName} / {champion.legendNumber} / {champion.colorLabel}
-            </h3>
-            <span className="shrink-0 text-sm font-semibold tabular-nums text-[var(--gold)]">${price}</span>
+          {/* The name is the image here — set large, with the metadata and the
+              price kept deliberately quiet underneath it. */}
+          <h3
+            className="mt-3 text-[clamp(2.75rem,6.5vw,4.75rem)] leading-[0.86] tracking-[-0.015em]"
+            style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+          >
+            {champion.legendName}
+          </h3>
+          <div className="mt-4 flex flex-wrap items-baseline gap-x-5 gap-y-1 text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
+            <span className="text-[var(--gold)]">No. {champion.legendNumber}</span>
+            <span>{champion.colorLabel}</span>
+            <span>{champion.country}</span>
           </div>
-          <p className="mt-1 text-sm italic text-[var(--muted)]">{champion.country}</p>
-          <p className="mt-1 text-sm font-semibold text-[var(--cream)]">{champion.tagline}</p>
+          <p
+            className="mt-5 text-[1.35rem] italic leading-snug text-[var(--cream)]"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            {champion.tagline}
+          </p>
 
           {mode === "tribute" ? (
             <div className="mt-5">
@@ -285,15 +296,22 @@ export const Configurator = forwardRef<HTMLDivElement>(function Configurator(_pr
             )}
           </section>
 
+          <div className="mt-6 flex items-baseline justify-between gap-4 border-b border-[var(--panel-line)] pb-3">
+            <span className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
+              {mode === "tribute" ? "Tribute" : mode === "blank" ? "Blank" : "Custom"}
+            </span>
+            <span className="text-sm tabular-nums text-[var(--muted)]">${price}</span>
+          </div>
+
           <button
             type="button"
             disabled={checkoutBusy}
             onClick={() => void goNext()}
-            className="mt-6 w-full bg-[var(--gold)] py-3.5 text-xs font-bold uppercase tracking-[0.14em] text-[var(--ink)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="liquid-btn mt-5 w-full bg-[var(--gold)] py-3.5 text-xs font-bold uppercase tracking-[0.14em] text-[var(--ink)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {nextLabel}
           </button>
-          <p className="mt-3 text-center text-xs leading-snug text-[var(--muted)]">
+          <p className="mt-3 text-center text-[0.68rem] leading-snug text-[var(--muted)]">
             Tribute ${priceFor("tribute")} · Blank ${priceFor("blank")} · Custom ${priceFor("custom")} ·
             Stripe checkout
           </p>

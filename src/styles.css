@@ -8,6 +8,9 @@
 }
 
 :root {
+  /* Native controls (the confirm checkbox) render light-on-white by default,
+     which reads as a bare white square against this palette. */
+  color-scheme: dark;
   --ink: #0a0d13;
   --panel: #12161e;
   --panel-line: rgba(245, 240, 230, 0.12);
