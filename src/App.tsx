@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { Hero } from "@/components/Hero";
 import { FeatureStrip } from "@/components/FeatureStrip";
 import { Configurator } from "@/components/Configurator";
+import { HallOfFame } from "@/components/HallOfFame";
 import { Footer } from "@/components/Footer";
 import { OrderComplete } from "@/pages/OrderComplete";
 import { OrderCancel } from "@/pages/OrderCancel";
@@ -13,6 +14,7 @@ function scrollToTop() {
 export function App() {
   const aboutRef = useRef<HTMLDivElement>(null);
   const configuratorRef = useRef<HTMLDivElement>(null);
+  const hallRef = useRef<HTMLDivElement>(null);
   const path = window.location.pathname;
 
   if (path === "/order/complete") return <OrderComplete />;
@@ -20,15 +22,27 @@ export function App() {
 
   const scrollToAbout = () => aboutRef.current?.scrollIntoView({ behavior: "smooth" });
   const scrollToConfigurator = () => configuratorRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToHall = () => hallRef.current?.scrollIntoView({ behavior: "smooth" });
 
   return (
     <div>
-      <Hero onHome={scrollToTop} onAbout={scrollToAbout} onBuild={scrollToConfigurator} />
+      <Hero
+        onHome={scrollToTop}
+        onAbout={scrollToAbout}
+        onBuild={scrollToConfigurator}
+        onHall={scrollToHall}
+      />
       <div ref={aboutRef}>
         <FeatureStrip />
       </div>
       <Configurator ref={configuratorRef} />
-      <Footer onHome={scrollToTop} onAbout={scrollToAbout} onBuild={scrollToConfigurator} />
+      <HallOfFame ref={hallRef} />
+      <Footer
+        onHome={scrollToTop}
+        onAbout={scrollToAbout}
+        onBuild={scrollToConfigurator}
+        onHall={scrollToHall}
+      />
     </div>
   );
 }

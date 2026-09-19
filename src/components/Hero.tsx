@@ -2,6 +2,7 @@ type Props = {
   onHome: () => void;
   onAbout: () => void;
   onBuild: () => void;
+  onHall: () => void;
 };
 
 /**
@@ -13,7 +14,7 @@ type Props = {
  * the right edge), and the HTML lockup becomes visible so the headline
  * is still legible on a phone.
  */
-export function Hero({ onHome, onAbout, onBuild }: Props) {
+export function Hero({ onHome, onAbout, onBuild, onHall }: Props) {
   return (
     <section className="relative border-b border-[var(--panel-line)]">
       <nav className="absolute inset-x-0 top-0 z-20 mx-auto flex max-w-[1400px] items-center justify-between px-6 py-5 sm:px-10">
@@ -33,8 +34,8 @@ export function Hero({ onHome, onAbout, onBuild }: Props) {
           <button onClick={onAbout} className="transition-colors hover:text-[var(--cream)]">
             PBWY
           </button>
-          <button onClick={onBuild} className="transition-colors hover:text-[var(--cream)]">
-            Collections
+          <button onClick={onHall} className="transition-colors hover:text-[var(--cream)]">
+            Hall of Fame
           </button>
         </div>
       </nav>
@@ -42,7 +43,7 @@ export function Hero({ onHome, onAbout, onBuild }: Props) {
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-black sm:aspect-[16/9] md:aspect-[1672/941]">
         <img
           src="/champions-hero.jpg"
-          alt="The Champions by No Parade F.C. — Pelé 10, Robben 11, Henry 12 and Reyna 13 in the four Release 01 colorways"
+          alt="The Champions by No Parade F.C. — Pelé 10, Robben 11, Henry 12 and Ballack 13 in the four Release 01 colorways"
           className="absolute inset-0 h-full w-full object-cover object-[30%_center] md:object-contain md:object-center"
         />
 
@@ -82,7 +83,7 @@ export function Hero({ onHome, onAbout, onBuild }: Props) {
         <div className="liquid-glass rise flex flex-col gap-5 rounded-sm px-6 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <p className="max-w-lg text-sm leading-relaxed text-[var(--cream)]/80">
             Release 01 — four legends, four colors, one shirt. Pelé 10 in Garnet, Robben 11 in
-            Orange, Henry 12 in Powder Blue, Reyna 13 in Black. Take the Tribute print, a Blank
+            Orange, Henry 12 in Powder Blue, Ballack 13 in Black. Take the Tribute print, a Blank
             shirt, or your own name and number.
           </p>
           <div className="flex flex-wrap gap-3">

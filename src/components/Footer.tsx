@@ -2,9 +2,10 @@ type Props = {
   onHome: () => void;
   onAbout: () => void;
   onBuild: () => void;
+  onHall: () => void;
 };
 
-export function Footer({ onHome, onAbout, onBuild }: Props) {
+export function Footer({ onHome, onAbout, onBuild, onHall }: Props) {
   return (
     <footer className="border-t border-[var(--panel-line)]">
       <div className="mx-auto flex max-w-[1400px] flex-col gap-8 px-6 py-14 sm:flex-row sm:items-start sm:justify-between sm:px-10">
@@ -26,6 +27,9 @@ export function Footer({ onHome, onAbout, onBuild }: Props) {
             </button>
             <button onClick={onBuild} className="text-left transition-colors hover:text-[var(--cream)]">
               The Champions
+            </button>
+            <button onClick={onHall} className="text-left transition-colors hover:text-[var(--cream)]">
+              Hall of Fame
             </button>
           </div>
         </div>

@@ -1,5 +1,5 @@
 const FEATURES = [
-  { title: "Choose your legend", detail: "Pelé, Robben, Henry, or Reyna — four fixed colorways." },
+  { title: "Choose your legend", detail: "Pelé, Robben, Henry, or Ballack — four fixed colorways." },
   { title: "Pick your print", detail: "Tribute (their name), Blank (no name), or Custom (yours)." },
   { title: "Preview live", detail: "See the colorway and, in Custom, your own name and number." },
   { title: "Wear the number", detail: "Carry the story. One release, four legends." },

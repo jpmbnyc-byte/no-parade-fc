@@ -4,7 +4,7 @@
  * architecture (France/Jamaica/Haiti/USA editions) is retired entirely —
  * see "THE CHAMPIONS by No Parade FC" for the collection this replaces
  * it with: four fixed colorways (Pelé/Garnet, Robben/Orange, Henry/Powder
- * Blue, Reyna/Black), each sold three ways — Tribute (the legend's exact
+ * Blue, Ballack/Black), each sold three ways — Tribute (the legend's exact
  * name + number, not editable), Blank (no name or number), or Custom
  * (your own name + number, same personalization engine as before).
  */
@@ -13,7 +13,7 @@ export const NAME_MAX = 15;
 export const NUMBER_MIN = 0;
 export const NUMBER_MAX = 99;
 
-export type ChampionId = "pele" | "robben" | "henry" | "reyna";
+export type ChampionId = "pele" | "robben" | "henry" | "ballack";
 
 export type Champion = {
   id: ChampionId;
@@ -29,6 +29,8 @@ export type Champion = {
   backSrc: string;
   /** Real nameless back photo — used for Blank mode and as the live-overlay plate in Custom mode. */
   blankBackSrc: string;
+  /** Hall of Fame campaign card — editorial art, shown in its own section, not in the configurator. */
+  cardSrc: string;
 };
 
 export const CHAMPIONS: Champion[] = [
@@ -44,6 +46,7 @@ export const CHAMPIONS: Champion[] = [
     frontSrc: "/champions-pele-front.jpg",
     backSrc: "/champions-pele-back.jpg",
     blankBackSrc: "/champions-pele-back-blank.jpg",
+    cardSrc: "/champions-pele-card.jpg",
   },
   {
     id: "robben",
@@ -57,6 +60,7 @@ export const CHAMPIONS: Champion[] = [
     frontSrc: "/champions-robben-front.jpg",
     backSrc: "/champions-robben-back.jpg",
     blankBackSrc: "/champions-robben-back-blank.jpg",
+    cardSrc: "/champions-robben-card.jpg",
   },
   {
     id: "henry",
@@ -70,19 +74,21 @@ export const CHAMPIONS: Champion[] = [
     frontSrc: "/champions-henry-front.jpg",
     backSrc: "/champions-henry-back.jpg",
     blankBackSrc: "/champions-henry-back-blank.jpg",
+    cardSrc: "/champions-henry-card.jpg",
   },
   {
-    id: "reyna",
-    legendName: "REYNA",
+    id: "ballack",
+    legendName: "BALLACK",
     legendNumber: "13",
     colorLabel: "Black",
     swatch: "#1C1817",
-    country: "USA",
-    tagline: "Vision. Intelligence. Influence.",
-    bio: "Claudio Reyna represented a different kind of excellence — control, vision and intelligence. A central figure for the United States across a major era of international football, he helped establish a standard for American players competing on the world stage. No. 13 becomes a marker of influence: the player who could change a match without needing to dominate the spotlight.",
-    frontSrc: "/champions-reyna-front.jpg",
-    backSrc: "/champions-reyna-back.jpg",
-    blankBackSrc: "/champions-reyna-back-blank.jpg",
+    country: "Germany",
+    tagline: "Leadership. Passion. Legacy.",
+    bio: "Michael Ballack represented a different kind of excellence — power, leadership and an instinct for the biggest moments. He won the Bundesliga and DFB-Pokal three times with Bayern Munich, completing three league-and-cup doubles between 2003 and 2006. At Chelsea, he added the Premier League, three FA Cups and the League Cup, while leading Germany as captain through a defining era of international football.",
+    frontSrc: "/champions-ballack-front.jpg",
+    backSrc: "/champions-ballack-back.jpg",
+    blankBackSrc: "/champions-ballack-back-blank.jpg",
+    cardSrc: "/champions-ballack-card.jpg",
   },
 ];
 

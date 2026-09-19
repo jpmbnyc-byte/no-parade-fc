@@ -2,7 +2,7 @@
 
 **The Champions — Release 01.** Four fixed colorways, each named for the
 legend who wore the number: Pelé 10 in Garnet, Robben 11 in Orange,
-Henry 12 in Powder Blue, Reyna 13 in Black. Each colorway sells three
+Henry 12 in Powder Blue, Ballack 13 in Black. Each colorway sells three
 ways:
 
 - **Tribute** — the legend's exact name and number, printed as shown.
@@ -18,9 +18,12 @@ Custom mode.
 
 Legal note: printing real professional athletes' names/numbers
 commercially is a right-of-publicity and trademark exposure point
-without a license or estate agreement. That's a business decision
-outside this codebase, not something resolved by the code — flagging
-it here so it isn't missed before a real launch.
+without a license or estate agreement. The Hall of Fame cards raise
+this further — they carry actual photographs of the players, and
+third-party marks (adidas, Nike, national federation crests) are
+visible within those photographs. That's a business decision outside
+this codebase, not something resolved by the code — flagging it here
+so it isn't missed before a real launch.
 
 The personalization mechanic (for Blank/Custom mode) is still the one
 ported from Bayonne Athletics' product page (`ba-athletics.com/team`):
@@ -48,7 +51,7 @@ ever re-cut, re-check that crop percentage against where the "C" of
 CHAMPIONS starts.
 
 `public/champions-<legend>-front.jpg`/`-back.jpg` (8 files: pele,
-robben, henry, reyna) are real product photography extracted at full
+robben, henry, ballack) are real product photography extracted at full
 resolution from "THE CHAMPIONS by No Parade FC" reference deck — not
 placeholders. Front plates never carry
 a name or number in this design (only the crest, `noparade` wordmark,
@@ -110,17 +113,19 @@ an offscreen canvas and the overlay scales down once it would exceed
 `name.maxWidthPct` (30% of the plate — the panel width at print height,
 before the raglan seam). Names are capped at `NAME_MAX` (15).
 
-`public/og.jpg` is a built social-share card from the old Build Your
-Crest headline — due for a re-render now that the product is The
-Champions; the meta tags in `index.html` already point at the new
-copy.
+`public/champions-<legend>-card.jpg` (4 files) are the Hall of Fame
+campaign cards. They are finished editorial art — each already carries
+its own headline, kit shot, back detail and crest at actual size — so
+`HallOfFame.tsx` presents them whole rather than breaking them apart
+and re-laying them out, and links each to the full-size file, since the
+fine print doesn't survive a card scaled down to phone width.
 
 Every nav item, footer link, and hero CTA is wired to something real:
 `Home` scrolls to top, `NPFC`/`PBWY`/`Explore NPFC` scroll to the "This
-is not merch" section, `The Champions`/`Collections`/the hero's
-primary CTA scroll to the configurator. There's no multi-page routing
-here (yet) — everything lives on the one page, so these are anchors,
-not separate destinations.
+is not merch" section, `The Champions`/the hero's primary CTA scroll to
+the configurator, and `Hall of Fame` scrolls to the cards. There's no
+multi-page routing here (yet) — everything lives on the one page, so
+these are anchors, not separate destinations.
 
 ## Stack
 

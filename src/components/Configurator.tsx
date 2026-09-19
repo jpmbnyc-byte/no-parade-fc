@@ -19,7 +19,7 @@ const MODES: Mode[] = ["tribute", "blank", "custom"];
 
 /**
  * The Champions — Release 01. Four fixed colorways (Pelé/Garnet,
- * Robben/Orange, Henry/Powder Blue, Reyna/Black), each sold three ways:
+ * Robben/Orange, Henry/Powder Blue, Ballack/Black), each sold three ways:
  * Tribute (the legend's exact print, not editable), Blank (no name or
  * number), or Custom (your own name + number — the same personalization
  * engine ported from Bayonne Athletics' product page). Replaces the
