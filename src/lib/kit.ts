@@ -107,6 +107,38 @@ export function isSize(v: unknown): v is Size {
   return typeof v === "string" && (SIZES as readonly string[]).includes(v);
 }
 
+/**
+ * Size chart, measured flat across the garment in inches.
+ *
+ * PLACEHOLDER — these are standard unisex match-shirt measurements, not this
+ * garment's spec sheet. Replace every row with the manufacturer's real
+ * numbers before taking orders at volume; a chart that is close but wrong
+ * generates exactly the returns it exists to prevent. This is the only place
+ * the numbers live, so it is a single edit.
+ */
+export const SIZE_GUIDE_IS_PLACEHOLDER = true;
+
+export type SizeRow = { size: Size; chest: string; length: string };
+
+export const SIZE_GUIDE: SizeRow[] = [
+  { size: "XS", chest: "17.5", length: "26.0" },
+  { size: "S", chest: "19.0", length: "27.0" },
+  { size: "M", chest: "20.5", length: "28.0" },
+  { size: "L", chest: "22.0", length: "29.0" },
+  { size: "XL", chest: "23.5", length: "30.0" },
+  { size: "XXL", chest: "25.0", length: "31.0" },
+];
+
+/**
+ * Countries the Stripe session accepts a shipping address for. Kept next to
+ * the policy copy so the two cannot drift apart; the list itself is set in
+ * api/create-checkout-session.ts.
+ */
+export const SHIPS_TO = [
+  "United States", "Canada", "United Kingdom", "Ireland",
+  "Australia", "New Zealand", "France", "Haiti", "Jamaica",
+];
+
 export type Mode = "tribute" | "blank" | "custom";
 
 export const MODE_LABEL: Record<Mode, string> = {

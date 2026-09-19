@@ -1,18 +1,18 @@
-import type { ChampionId, Mode, Size } from "@/lib/kit";
+import type { CartItem } from "@/lib/cart";
 
-export type CheckoutPayload = {
-  championId: ChampionId;
-  mode: Mode;
-  size: Size;
-  name: string;
-  number: string;
-};
-
-export async function startCheckout(payload: CheckoutPayload): Promise<void> {
+export async function startCheckout(items: CartItem[]): Promise<void> {
   const res = await fetch("/api/create-checkout-session", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      items: items.map(({ championId, mode, size, name, number }) => ({
+        championId,
+        mode,
+        size,
+        name,
+        number,
+      })),
+    }),
   });
   if (!res.ok) {
     throw new Error("Checkout could not start. Try again in a moment.");

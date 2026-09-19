@@ -3,6 +3,8 @@ type Props = {
   onCollection: () => void;
   onBuild: () => void;
   onHall: () => void;
+  bagCount: number;
+  onBag: () => void;
 };
 
 /**
@@ -13,14 +15,15 @@ type Props = {
  * unlike the previous hero (whose lockup was baked into the art and got
  * cropped off on narrow screens) it reflows instead of disappearing.
  */
-export function Hero({ onHome, onCollection, onBuild, onHall }: Props) {
+export function Hero({ onHome, onCollection, onBuild, onHall, bagCount, onBag }: Props) {
   return (
     <section className="relative border-b border-[var(--panel-line)]">
       <nav className="absolute inset-x-0 top-0 z-30 mx-auto flex max-w-[1400px] items-center justify-between px-6 py-5 sm:px-10">
         <button onClick={onHome} className="flex items-center">
           <img src="/logo-white.png" alt="No Parade F.C." className="h-6 w-auto sm:h-7" />
         </button>
-        <div className="hidden gap-8 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--cream)]/80 sm:flex">
+        <div className="flex items-center gap-8 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--cream)]/80">
+          <div className="hidden gap-8 sm:flex">
           <button onClick={onHome} className="transition-colors hover:text-[var(--cream)]">
             Home
           </button>
@@ -32,6 +35,14 @@ export function Hero({ onHome, onCollection, onBuild, onHall }: Props) {
           </button>
           <button onClick={onHall} className="transition-colors hover:text-[var(--cream)]">
             Hall of Fame
+          </button>
+          </div>
+          <button
+            onClick={onBag}
+            aria-label={`Open bag, ${bagCount} item${bagCount === 1 ? "" : "s"}`}
+            className="transition-colors hover:text-[var(--cream)]"
+          >
+            Bag{bagCount > 0 ? ` (${bagCount})` : ""}
           </button>
         </div>
       </nav>

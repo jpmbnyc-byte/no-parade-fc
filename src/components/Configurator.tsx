@@ -15,7 +15,7 @@ import {
   type Size,
 } from "@/lib/kit";
 import { JerseyCanvas, type CanvasView } from "@/components/JerseyCanvas";
-import { startCheckout } from "@/lib/checkout";
+import { SizeGuide } from "@/components/SizeGuide";
 
 const MODES: Mode[] = ["tribute", "blank", "custom"];
 
@@ -30,10 +30,11 @@ const MODES: Mode[] = ["tribute", "blank", "custom"];
 type Props = {
   championId: ChampionId;
   onChampionChange: (id: ChampionId) => void;
+  onAdd: (item: { championId: ChampionId; mode: Mode; size: Size; name: string; number: string }) => void;
 };
 
 export const Configurator = forwardRef<HTMLDivElement, Props>(function Configurator(
-  { championId, onChampionChange },
+  { championId, onChampionChange, onAdd },
   ref,
 ) {
   const [mode, setMode] = useState<Mode>("tribute");
@@ -42,8 +43,8 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
   const [number, setNumber] = useState("");
   const [view, setView] = useState<CanvasView>("front");
   const [confirmed, setConfirmed] = useState(false);
-  const [checkoutBusy, setCheckoutBusy] = useState(false);
-  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [guideOpen, setGuideOpen] = useState(false);
+  const [justAdded, setJustAdded] = useState(false);
 
   // Below lg everything stacks, which pushes the price and the checkout
   // button a couple of screens under the jersey. The bar keeps both on
@@ -82,17 +83,17 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
   const numberValid =
     number !== "" && Number.isFinite(numberValue) && numberValue >= NUMBER_MIN && numberValue <= NUMBER_MAX;
   const customComplete = mode !== "custom" || Boolean(name && numberValid && issues.length === 0);
-  const checkoutReady = customComplete && size !== null && confirmed;
+  
 
   const nextLabel = (() => {
-    if (checkoutBusy) return "Redirecting to checkout";
+    if (justAdded) return "Added to bag";
     if (mode === "custom" && !customComplete) return "Complete name + number";
     if (!size) return "Choose a size";
     if (!confirmed) return "Confirm selection";
-    return `Checkout · $${price}`;
+    return `Add to bag · $${price}`;
   })();
 
-  async function goNext() {
+  function goNext() {
     if (mode === "custom" && !customComplete) {
       document.getElementById("field-personalize")?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
@@ -105,22 +106,15 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
       document.getElementById("field-confirm")?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
-    if (!checkoutReady) return;
 
-    setCheckoutBusy(true);
-    setCheckoutError(null);
-    try {
-      await startCheckout({
-        championId,
-        mode,
-        size,
-        name: mode === "custom" ? name : "",
-        number: mode === "custom" ? number : "",
-      });
-    } catch (e) {
-      setCheckoutBusy(false);
-      setCheckoutError(e instanceof Error ? e.message : "Checkout could not start.");
-    }
+    onAdd({ championId, mode, size, name: mode === "custom" ? name : "", number: mode === "custom" ? number : "" });
+
+    // Reset the parts of the build that are specific to the shirt just added,
+    // so the next one starts clean rather than silently inheriting a size.
+    setConfirmed(false);
+    setSize(null);
+    setJustAdded(true);
+    window.setTimeout(() => setJustAdded(false), 2000);
   }
 
   return (
@@ -291,9 +285,20 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
                 <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
                   Size
                 </p>
-                {!size && (
-                  <p className="text-[0.65rem] uppercase tracking-[0.14em] text-[var(--gold)]">Required</p>
-                )}
+                <div className="flex items-baseline gap-4">
+                  {!size && (
+                    <p className="text-[0.65rem] uppercase tracking-[0.14em] text-[var(--gold)]">
+                      Required
+                    </p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setGuideOpen(true)}
+                    className="text-[0.65rem] uppercase tracking-[0.14em] text-[var(--muted)] underline underline-offset-4 transition-colors hover:text-[var(--cream)]"
+                  >
+                    Size guide
+                  </button>
+                </div>
               </div>
               <div className="mt-3 grid grid-cols-6 gap-2">
                 {SIZES.map((sz) => (
@@ -378,11 +383,6 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
                   : "I've checked the colorway and edition."}
               </span>
             </label>
-            {checkoutError && (
-              <p className="mt-4 text-sm text-red-400" role="alert">
-                {checkoutError}
-              </p>
-            )}
           </section>
 
           <div className="order-3 mt-6 flex items-baseline justify-between gap-4 border-b border-[var(--panel-line)] pb-3">
@@ -395,18 +395,19 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
           <button
             ref={ctaRef}
             type="button"
-            disabled={checkoutBusy}
-            onClick={() => void goNext()}
-            className="liquid-btn order-3 mt-5 w-full bg-[var(--gold)] py-3.5 text-xs font-bold uppercase tracking-[0.14em] text-[var(--ink)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            onClick={goNext}
+            className="liquid-btn order-3 mt-5 w-full bg-[var(--gold)] py-3.5 text-xs font-bold uppercase tracking-[0.14em] text-[var(--ink)] transition-opacity hover:opacity-90"
           >
             {nextLabel}
           </button>
           <p className="order-3 mt-3 text-center text-[0.68rem] leading-snug text-[var(--muted)]">
             Tribute ${priceFor("tribute")} · Blank ${priceFor("blank")} · Custom ${priceFor("custom")} ·
-            Stripe checkout
+            Free shipping over $250
           </p>
         </div>
       </div>
+
+      <SizeGuide open={guideOpen} onClose={() => setGuideOpen(false)} />
 
       <div
         className={`fixed inset-x-0 bottom-0 z-40 border-t border-[var(--panel-line)] bg-[var(--ink)]/92 backdrop-blur-md transition-transform duration-300 lg:hidden ${
@@ -423,8 +424,7 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
           </div>
           <button
             type="button"
-            disabled={checkoutBusy}
-            onClick={() => void goNext()}
+            onClick={goNext}
             className="ml-auto shrink-0 bg-[var(--gold)] px-6 py-3 text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[var(--ink)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {nextLabel}
