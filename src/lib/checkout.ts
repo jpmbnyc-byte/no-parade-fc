@@ -1,8 +1,9 @@
-import type { ChampionId, Mode } from "@/lib/kit";
+import type { ChampionId, Mode, Size } from "@/lib/kit";
 
 export type CheckoutPayload = {
   championId: ChampionId;
   mode: Mode;
+  size: Size;
   name: string;
   number: string;
 };

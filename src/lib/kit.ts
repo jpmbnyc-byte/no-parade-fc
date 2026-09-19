@@ -96,6 +96,17 @@ export function championById(id: ChampionId): Champion {
   return CHAMPIONS.find((c) => c.id === id) ?? CHAMPIONS[0]!;
 }
 
+/**
+ * Garment sizes. There is no default: a jersey shipped in the wrong size is
+ * a return, so the build is deliberately incomplete until one is picked.
+ */
+export const SIZES = ["XS", "S", "M", "L", "XL", "XXL"] as const;
+export type Size = (typeof SIZES)[number];
+
+export function isSize(v: unknown): v is Size {
+  return typeof v === "string" && (SIZES as readonly string[]).includes(v);
+}
+
 export type Mode = "tribute" | "blank" | "custom";
 
 export const MODE_LABEL: Record<Mode, string> = {

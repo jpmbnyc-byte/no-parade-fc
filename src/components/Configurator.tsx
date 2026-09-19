@@ -4,6 +4,7 @@ import {
   NAME_MAX,
   NUMBER_MAX,
   NUMBER_MIN,
+  SIZES,
   championById,
   priceFor,
   sanitizeName,
@@ -11,6 +12,7 @@ import {
   validateBuild,
   type ChampionId,
   type Mode,
+  type Size,
 } from "@/lib/kit";
 import { JerseyCanvas, type CanvasView } from "@/components/JerseyCanvas";
 import { startCheckout } from "@/lib/checkout";
@@ -35,6 +37,7 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
   ref,
 ) {
   const [mode, setMode] = useState<Mode>("tribute");
+  const [size, setSize] = useState<Size | null>(null);
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
   const [view, setView] = useState<CanvasView>("front");
@@ -46,14 +49,24 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
   // button a couple of screens under the jersey. The bar keeps both on
   // screen for as long as the configurator is.
   const bodyRef = useRef<HTMLDivElement>(null);
-  const [barVisible, setBarVisible] = useState(false);
+  const ctaRef = useRef<HTMLButtonElement>(null);
+  const [bodyOnScreen, setBodyOnScreen] = useState(false);
+  const [ctaOnScreen, setCtaOnScreen] = useState(false);
   useEffect(() => {
-    const el = bodyRef.current;
-    if (!el || typeof IntersectionObserver === "undefined") return;
-    const io = new IntersectionObserver(([entry]) => setBarVisible(entry.isIntersecting));
-    io.observe(el);
-    return () => io.disconnect();
+    if (typeof IntersectionObserver === "undefined") return;
+    const watch = (el: Element | null, set: (v: boolean) => void) => {
+      if (!el) return () => {};
+      const io = new IntersectionObserver(([entry]) => set(entry.isIntersecting));
+      io.observe(el);
+      return () => io.disconnect();
+    };
+    const a = watch(bodyRef.current, setBodyOnScreen);
+    const b = watch(ctaRef.current, setCtaOnScreen);
+    return () => { a(); b(); };
   }, []);
+  // The bar exists to reach the button that is off screen; showing it while
+  // that button is visible just prints the same control twice.
+  const barVisible = bodyOnScreen && !ctaOnScreen;
 
   const champion = championById(championId);
   const price = priceFor(mode);
@@ -69,11 +82,12 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
   const numberValid =
     number !== "" && Number.isFinite(numberValue) && numberValue >= NUMBER_MIN && numberValue <= NUMBER_MAX;
   const customComplete = mode !== "custom" || Boolean(name && numberValid && issues.length === 0);
-  const checkoutReady = customComplete && confirmed;
+  const checkoutReady = customComplete && size !== null && confirmed;
 
   const nextLabel = (() => {
     if (checkoutBusy) return "Redirecting to checkout";
     if (mode === "custom" && !customComplete) return "Complete name + number";
+    if (!size) return "Choose a size";
     if (!confirmed) return "Confirm selection";
     return `Checkout · $${price}`;
   })();
@@ -81,6 +95,10 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
   async function goNext() {
     if (mode === "custom" && !customComplete) {
       document.getElementById("field-personalize")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    if (!size) {
+      document.getElementById("field-size")?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
     if (!confirmed) {
@@ -95,6 +113,7 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
       await startCheckout({
         championId,
         mode,
+        size,
         name: mode === "custom" ? name : "",
         number: mode === "custom" ? number : "",
       });
@@ -120,7 +139,8 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
             aria-pressed={championId === c.id}
             onClick={() => {
               onChampionChange(c.id);
-              setView("front");
+              // Keep the side you were working on: in Custom that is the back.
+              setView(mode === "custom" ? "back" : "front");
             }}
             className={`size-7 rounded-full transition-all duration-200 ${
               championId === c.id
@@ -132,14 +152,19 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
         ))}
       </div>
 
-      <div ref={bodyRef} className="mt-10 grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
+      <div ref={bodyRef} className="mt-10 grid gap-x-10 gap-y-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-start lg:gap-y-10">
         <div className="lg:sticky lg:top-10">
           <div className="mb-4 flex gap-6 border-b border-[var(--panel-line)] pb-3">
             {MODES.map((m) => (
               <button
                 key={m}
                 type="button"
-                onClick={() => setMode(m)}
+                onClick={() => {
+                  setMode(m);
+                  // Custom prints on the back, so land there; nothing else
+                  // would change on screen as you type.
+                  setView(m === "custom" ? "back" : "front");
+                }}
                 aria-pressed={mode === m}
                 className={`-mb-[13px] border-b pb-3 text-[0.68rem] font-semibold uppercase tracking-[0.2em] transition-colors ${
                   mode === m
@@ -152,60 +177,144 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
             ))}
           </div>
 
-          {/* The plate is square and fills its column, so it runs about 740px
-              tall on a desktop viewport. Front/Back used to sit underneath it
-              as two small text links, which put the control below the fold
-              while the thing it controls was on screen. It rides the image
-              now, at the top edge rather than the bottom: the plate is taller
-              than a laptop viewport, so anything anchored to its bottom is
-              off screen the moment the jersey fills the window. */}
-          <div className="relative">
-            <JerseyCanvas
-              view={view}
-              frontSrc={champion.frontSrc}
-              backSrc={mode === "tribute" ? champion.backSrc : champion.blankBackSrc}
-              name={effectiveName}
-              number={effectiveNumber}
-              showOverlay={mode !== "tribute"}
-            />
+          {/* Front/Back sits above the plate, not on it. It was an overlay
+              pill riding the top edge, which landed square on the collar of
+              every garment; before that it was text under a plate that runs
+              ~740px tall on a laptop, which put it below the fold. Its own
+              row costs ~40px and is always both visible and clear of the art. */}
+          <div className="mb-3 flex items-center justify-between gap-4">
+            <p className="text-xs text-[var(--muted)]">
+              {mode === "tribute"
+                ? "Real print — not editable"
+                : view === "front"
+                  ? "Front carries no name or number"
+                  : mode === "blank"
+                    ? "No name or number"
+                    : "Live name and number"}
+            </p>
+            <div
+              className="flex shrink-0 items-center gap-1 rounded-full border border-[var(--panel-line)] bg-[var(--panel)] p-1"
+              role="group"
+              aria-label="Jersey view"
+            >
+              {(["front", "back"] as const).map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => setView(v)}
+                  aria-pressed={view === v}
+                  className={`rounded-full px-4 py-1.5 text-[0.66rem] font-bold uppercase tracking-[0.16em] transition-colors ${
+                    view === v
+                      ? "bg-[var(--gold)] text-[var(--ink)]"
+                      : "text-[var(--muted)] hover:text-[var(--cream)]"
+                  }`}
+                >
+                  {v === "front" ? "Front" : "Back"}
+                </button>
+              ))}
+            </div>
+          </div>
 
-            <div className="pointer-events-none absolute inset-x-0 top-0 flex justify-end p-3 sm:p-4">
-              <div
-                className="pointer-events-auto flex items-center gap-1 rounded-full border border-white/10 bg-black/55 p-1 backdrop-blur-md"
-                role="group"
-                aria-label="Jersey view"
-              >
-                {(["front", "back"] as const).map((v) => (
+          <JerseyCanvas
+            view={view}
+            frontSrc={champion.frontSrc}
+            backSrc={mode === "tribute" ? champion.backSrc : champion.blankBackSrc}
+            name={effectiveName}
+            number={effectiveNumber}
+            showOverlay={mode !== "tribute"}
+          />
+
+        </div>
+
+        <div className="flex flex-col">
+            {/* The build controls are ordered, not placed: on a phone they
+                come straight after the preview they drive, and on a desktop
+                they sit in the right rail with the checkout button. Under the
+                plate at both sizes does not work — the desktop plate runs
+                ~740px tall, so anything below it starts off screen. */}
+            {mode === "custom" && (
+              <div className="order-1 border-b border-[var(--panel-line)] pb-5 lg:order-2 lg:mt-6 lg:border-b-0 lg:border-t lg:pb-0 lg:pt-5">
+                <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
+                  Name and number
+                </p>
+                <div id="field-personalize" className="mt-3 grid grid-cols-[7rem_1fr] gap-3">
+                  <OutlinedField
+                    id="field-number"
+                    label="00"
+                    value={number}
+                    maxLength={2}
+                    inputMode="numeric"
+                    placeholder="07"
+                    onChange={(v) => {
+                      setNumber(sanitizeNumber(v));
+                      setView("back");
+                    }}
+                    counter={`${number.length} / 2`}
+                    error={numberError}
+                  />
+                  <OutlinedField
+                    id="field-name"
+                    label="Name"
+                    value={name}
+                    maxLength={NAME_MAX}
+                    placeholder="YOUR NAME"
+                    onChange={(v) => {
+                      setName(sanitizeName(v));
+                      setView("back");
+                    }}
+                    counter={`${name.length} / ${NAME_MAX}`}
+                    error={nameError}
+                  />
+                </div>
+
+                {!customComplete && (name || number) && (
+                  <p className="mt-3 text-sm text-[var(--gold)]">
+                    Add both a name and a valid number, or clear both fields.
+                  </p>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setName("");
+                    setNumber("");
+                  }}
+                  disabled={!name && !number}
+                  className="mt-3 text-sm text-[var(--muted)] underline underline-offset-4 disabled:opacity-40"
+                >
+                  Clear personalization
+                </button>
+              </div>
+            )}
+            <div id="field-size" className="order-1 mt-5 border-b border-[var(--panel-line)] pb-5 lg:order-2 lg:border-b-0 lg:border-t lg:pb-0 lg:pt-5">
+              <div className="flex items-baseline justify-between gap-4">
+                <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
+                  Size
+                </p>
+                {!size && (
+                  <p className="text-[0.65rem] uppercase tracking-[0.14em] text-[var(--gold)]">Required</p>
+                )}
+              </div>
+              <div className="mt-3 grid grid-cols-6 gap-2">
+                {SIZES.map((sz) => (
                   <button
-                    key={v}
+                    key={sz}
                     type="button"
-                    onClick={() => setView(v)}
-                    aria-pressed={view === v}
-                    className={`rounded-full px-5 py-2 text-[0.68rem] font-bold uppercase tracking-[0.16em] transition-colors ${
-                      view === v
-                        ? "bg-[var(--gold)] text-[var(--ink)]"
-                        : "text-[var(--cream)]/70 hover:text-[var(--cream)]"
+                    onClick={() => setSize(sz)}
+                    aria-pressed={size === sz}
+                    className={`border px-1 py-2.5 text-xs font-bold uppercase tracking-[0.06em] transition-colors ${
+                      size === sz
+                        ? "border-[var(--gold)] bg-[var(--gold)] text-[var(--ink)]"
+                        : "border-[var(--panel-line)] text-[var(--cream)] hover:border-[var(--muted)]"
                     }`}
                   >
-                    {v === "front" ? "Front" : "Back"}
+                    {sz}
                   </button>
                 ))}
               </div>
             </div>
-          </div>
 
-          <p className="mt-3 text-center text-xs text-[var(--muted)]">
-            {mode === "tribute"
-              ? "Real print — not editable"
-              : view === "front"
-                ? "Front carries no name or number"
-                : mode === "blank"
-                  ? "No name or number"
-                  : "Live name and number"}
-          </p>
-        </div>
-
-        <div>
+          <div className="order-2 lg:order-1">
           <p className="text-[0.65rem] font-bold uppercase tracking-[0.3em] text-[var(--muted)]">
             Legend / Icon / Champion
           </p>
@@ -247,60 +356,15 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
               print.
             </p>
           ) : (
-            <div className="mt-5">
-              <p className="text-sm leading-relaxed text-[var(--muted)]">
-                Your name and number on the {champion.colorLabel.toLowerCase()} colorway. Same digits, same
-                font. Letters, spaces, hyphens and apostrophes.
-              </p>
-
-              <div id="field-personalize" className="mt-5 grid grid-cols-[7rem_1fr] gap-3">
-                <OutlinedField
-                  id="field-number"
-                  label="00"
-                  value={number}
-                  maxLength={2}
-                  inputMode="numeric"
-                  placeholder="07"
-                  onChange={(v) => {
-                    setNumber(sanitizeNumber(v));
-                    setView("front");
-                  }}
-                  counter={`${number.length} / 2`}
-                  error={numberError}
-                />
-                <OutlinedField
-                  id="field-name"
-                  label="Name"
-                  value={name}
-                  maxLength={NAME_MAX}
-                  placeholder="YOUR NAME"
-                  onChange={(v) => setName(sanitizeName(v))}
-                  counter={`${name.length} / ${NAME_MAX}`}
-                  error={nameError}
-                />
-              </div>
-
-              {!customComplete && (name || number) && (
-                <p className="mt-3 text-sm text-[var(--gold)]">
-                  Add both a name and a valid number, or clear both fields.
-                </p>
-              )}
-
-              <button
-                type="button"
-                onClick={() => {
-                  setName("");
-                  setNumber("");
-                }}
-                disabled={!name && !number}
-                className="mt-3 text-sm text-[var(--muted)] underline underline-offset-4 disabled:opacity-40"
-              >
-                Clear personalization
-              </button>
-            </div>
+            <p className="mt-5 text-sm leading-relaxed text-[var(--muted)]">
+              Your name and number on the {champion.colorLabel.toLowerCase()} colorway — same digits, same
+              font as the tribute print. Letters, spaces, hyphens and apostrophes, up to {NAME_MAX} characters.
+            </p>
           )}
 
-          <section id="field-confirm" className="mt-8 border-t border-[var(--panel-line)] pt-6">
+          </div>
+
+          <section id="field-confirm" className="order-3 mt-8 border-t border-[var(--panel-line)] pt-6">
             <label className="flex items-start gap-3 text-sm leading-snug text-[var(--muted)]">
               <input
                 type="checkbox"
@@ -321,7 +385,7 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
             )}
           </section>
 
-          <div className="mt-6 flex items-baseline justify-between gap-4 border-b border-[var(--panel-line)] pb-3">
+          <div className="order-3 mt-6 flex items-baseline justify-between gap-4 border-b border-[var(--panel-line)] pb-3">
             <span className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
               {mode === "tribute" ? "Tribute" : mode === "blank" ? "Blank" : "Custom"}
             </span>
@@ -329,14 +393,15 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
           </div>
 
           <button
+            ref={ctaRef}
             type="button"
             disabled={checkoutBusy}
             onClick={() => void goNext()}
-            className="liquid-btn mt-5 w-full bg-[var(--gold)] py-3.5 text-xs font-bold uppercase tracking-[0.14em] text-[var(--ink)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="liquid-btn order-3 mt-5 w-full bg-[var(--gold)] py-3.5 text-xs font-bold uppercase tracking-[0.14em] text-[var(--ink)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {nextLabel}
           </button>
-          <p className="mt-3 text-center text-[0.68rem] leading-snug text-[var(--muted)]">
+          <p className="order-3 mt-3 text-center text-[0.68rem] leading-snug text-[var(--muted)]">
             Tribute ${priceFor("tribute")} · Blank ${priceFor("blank")} · Custom ${priceFor("custom")} ·
             Stripe checkout
           </p>
@@ -352,6 +417,7 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
           <div className="min-w-0">
             <p className="truncate text-[0.6rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
               {champion.legendName} · {mode === "tribute" ? "Tribute" : mode === "blank" ? "Blank" : "Custom"}
+              {size ? ` · ${size}` : ""}
             </p>
             <p className="text-sm tabular-nums text-[var(--cream)]">${price}</p>
           </div>

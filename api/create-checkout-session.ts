@@ -1,11 +1,12 @@
 import Stripe from "stripe";
-import { championById, priceFor, type ChampionId, type Mode } from "../src/lib/kit";
+import { championById, isSize, priceFor, type ChampionId, type Mode, type Size } from "../src/lib/kit";
 
 export const config = { runtime: "edge" };
 
 type Body = {
   championId: ChampionId;
   mode: Mode;
+  size: Size;
   name: string;
   number: string;
 };
@@ -22,6 +23,13 @@ export default async function handler(req: Request): Promise<Response> {
   }
 
   const body = (await req.json()) as Body;
+
+  // Without a size the order cannot be fulfilled, so refuse it here as well
+  // as in the UI — this endpoint is reachable independently of the form.
+  if (!isSize(body.size)) {
+    return new Response("A garment size is required.", { status: 400 });
+  }
+
   const champion = championById(body.championId);
   const unitAmount = priceFor(body.mode) * 100;
 
@@ -31,6 +39,7 @@ export default async function handler(req: Request): Promise<Response> {
 
   const description = [
     `${champion.legendName} colorway — ${champion.colorLabel}`,
+    `Size ${body.size}`,
     printedName && `Name: ${printedName}`,
     printedNumber && `# ${printedNumber}`,
   ]
@@ -60,7 +69,7 @@ export default async function handler(req: Request): Promise<Response> {
           currency: "usd",
           unit_amount: unitAmount,
           product_data: {
-            name: `No Parade F.C. — The Champions — ${champion.colorLabel} (${body.mode})`,
+            name: `No Parade F.C. — The Champions — ${champion.colorLabel} ${body.size} (${body.mode})`,
             description,
           },
         },
@@ -69,6 +78,7 @@ export default async function handler(req: Request): Promise<Response> {
     metadata: {
       champion: body.championId,
       mode: body.mode,
+      size: body.size,
       name: printedName,
       number: printedNumber,
     },
