@@ -25,8 +25,15 @@ const MODES: Mode[] = ["tribute", "blank", "custom"];
  * engine ported from Bayonne Athletics' product page). Replaces the
  * retired nation-edition architecture entirely.
  */
-export const Configurator = forwardRef<HTMLDivElement>(function Configurator(_props, ref) {
-  const [championId, setChampionId] = useState<ChampionId>("pele");
+type Props = {
+  championId: ChampionId;
+  onChampionChange: (id: ChampionId) => void;
+};
+
+export const Configurator = forwardRef<HTMLDivElement, Props>(function Configurator(
+  { championId, onChampionChange },
+  ref,
+) {
   const [mode, setMode] = useState<Mode>("tribute");
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
@@ -86,50 +93,45 @@ export const Configurator = forwardRef<HTMLDivElement>(function Configurator(_pr
 
   return (
     <section ref={ref} className="mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
-      <p className="text-xs font-bold uppercase tracking-[0.28em] text-[var(--gold)]">
-        The Champions — Release 01
-      </p>
-      <h2 className="mt-2 text-3xl" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>
-        Four legends. Four colors. One shirt.
-      </h2>
+      <p className="text-[0.65rem] font-bold uppercase tracking-[0.3em] text-[var(--gold)]">Build yours</p>
 
-      <div className="mt-4 flex flex-wrap gap-2">
+      {/* Colorway swatches only — the collection strip above is the visual
+          index, so this stays a compact control rather than repeating it. */}
+      <div className="mt-5 flex flex-wrap items-center gap-3">
         {CHAMPIONS.map((c) => (
           <button
             key={c.id}
             type="button"
+            title={`${c.legendName} ${c.legendNumber} — ${c.colorLabel}`}
+            aria-label={`${c.legendName} ${c.legendNumber} — ${c.colorLabel}`}
+            aria-pressed={championId === c.id}
             onClick={() => {
-              setChampionId(c.id);
+              onChampionChange(c.id);
               setView("front");
             }}
-            className={`flex items-center gap-2 border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] transition-colors ${
+            className={`size-7 rounded-full transition-all duration-200 ${
               championId === c.id
-                ? "border-[var(--gold)] text-[var(--gold)]"
-                : "border-[var(--panel-line)] text-[var(--muted)] hover:border-[var(--muted)]"
+                ? "ring-1 ring-[var(--gold)] ring-offset-4 ring-offset-[var(--ink)]"
+                : "opacity-55 hover:opacity-100"
             }`}
-          >
-            <span
-              className="size-2.5 rounded-full border border-black/30"
-              style={{ background: c.swatch }}
-              aria-hidden
-            />
-            {c.legendName} {c.legendNumber} — {c.colorLabel}
-          </button>
+            style={{ background: c.swatch, boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.18)" }}
+          />
         ))}
       </div>
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
         <div className="lg:sticky lg:top-10">
-          <div className="mb-3 flex gap-2">
+          <div className="mb-4 flex gap-6 border-b border-[var(--panel-line)] pb-3">
             {MODES.map((m) => (
               <button
                 key={m}
                 type="button"
                 onClick={() => setMode(m)}
-                className={`border px-4 py-2 text-sm transition-colors ${
+                aria-pressed={mode === m}
+                className={`-mb-[13px] border-b pb-3 text-[0.68rem] font-semibold uppercase tracking-[0.2em] transition-colors ${
                   mode === m
-                    ? "border-[var(--gold)] bg-[var(--gold)] text-[var(--ink)]"
-                    : "border-[var(--panel-line)] text-[var(--muted)]"
+                    ? "border-[var(--gold)] text-[var(--gold)]"
+                    : "border-transparent text-[var(--muted)] hover:text-[var(--cream)]"
                 }`}
               >
                 {m === "tribute" ? "Tribute" : m === "blank" ? "Blank" : "Custom"}

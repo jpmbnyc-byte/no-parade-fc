@@ -11,8 +11,10 @@
   /* Native controls (the confirm checkbox) render light-on-white by default,
      which reads as a bare white square against this palette. */
   color-scheme: dark;
-  --ink: #0a0d13;
-  --panel: #12161e;
+  /* Warm near-black, not blue-black. Every image on this site — the campaign
+     art, the Hall of Fame cards — is warm; a cool ground made both look off. */
+  --ink: #0c0a09;
+  --panel: #15120f;
   --panel-line: rgba(245, 240, 230, 0.12);
   --cream: #f4efe4;
   --muted: rgba(244, 239, 228, 0.55);

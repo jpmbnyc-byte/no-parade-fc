@@ -1,6 +1,6 @@
 type Props = {
   onHome: () => void;
-  onAbout: () => void;
+  onCollection: () => void;
   onBuild: () => void;
   onHall: () => void;
 };
@@ -14,7 +14,7 @@ type Props = {
  * the right edge), and the HTML lockup becomes visible so the headline
  * is still legible on a phone.
  */
-export function Hero({ onHome, onAbout, onBuild, onHall }: Props) {
+export function Hero({ onHome, onCollection, onBuild, onHall }: Props) {
   return (
     <section className="relative border-b border-[var(--panel-line)]">
       <nav className="absolute inset-x-0 top-0 z-20 mx-auto flex max-w-[1400px] items-center justify-between px-6 py-5 sm:px-10">
@@ -25,14 +25,11 @@ export function Hero({ onHome, onAbout, onBuild, onHall }: Props) {
           <button onClick={onHome} className="transition-colors hover:text-[var(--cream)]">
             Home
           </button>
-          <button onClick={onAbout} className="transition-colors hover:text-[var(--cream)]">
-            NPFC
+          <button onClick={onCollection} className="transition-colors hover:text-[var(--cream)]">
+            Collection
           </button>
           <button onClick={onBuild} className="text-[var(--gold)] transition-colors hover:text-[var(--cream)]">
             The Champions
-          </button>
-          <button onClick={onAbout} className="transition-colors hover:text-[var(--cream)]">
-            PBWY
           </button>
           <button onClick={onHall} className="transition-colors hover:text-[var(--cream)]">
             Hall of Fame
@@ -94,10 +91,10 @@ export function Hero({ onHome, onAbout, onBuild, onHall }: Props) {
               Shop The Champions →
             </button>
             <button
-              onClick={onAbout}
+              onClick={onCollection}
               className="border border-[var(--cream)]/25 px-7 py-3.5 text-xs font-bold uppercase tracking-[0.14em] transition-colors hover:border-[var(--gold)]"
             >
-              Explore NPFC
+              View the collection
             </button>
           </div>
         </div>
