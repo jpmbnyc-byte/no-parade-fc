@@ -1,14 +1,19 @@
 import { forwardRef } from "react";
-import { CHAMPIONS } from "@/lib/kit";
+import { CHAMPIONS, type ChampionId } from "@/lib/kit";
+
+type Props = {
+  /** Selects that colorway in the configurator and scrolls to it. */
+  onSelect: (id: ChampionId) => void;
+};
 
 /**
  * The Hall of Fame campaign cards. These are finished editorial art —
  * each already carries its own headline, kit shot, back detail and crest
  * — so they're presented whole rather than broken apart and re-laid-out.
- * Each links to the full-size file, since the cards carry fine print
- * that a scaled-down card on a phone can't hold.
+ * A card is a way into the product, not a download: clicking one selects
+ * that colorway in the configurator and scrolls you there.
  */
-export const HallOfFame = forwardRef<HTMLDivElement>(function HallOfFame(_props, ref) {
+export const HallOfFame = forwardRef<HTMLDivElement, Props>(function HallOfFame({ onSelect }, ref) {
   return (
     <section ref={ref} className="border-t border-[var(--panel-line)]">
       <div className="mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
@@ -18,17 +23,17 @@ export const HallOfFame = forwardRef<HTMLDivElement>(function HallOfFame(_props,
         </h2>
         <p className="mt-4 max-w-xl text-sm leading-relaxed text-[var(--muted)]">
           One card per champion — the kit, the back detail, the crest at actual size, and the
-          player who made the number mean something.
+          player who made the number mean something. Pick one to build it.
         </p>
 
         <div className="mt-10 grid gap-6 lg:grid-cols-2">
           {CHAMPIONS.map((c) => (
-            <a
+            <button
               key={c.id}
-              href={c.cardSrc}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative block overflow-hidden rounded-sm border border-[var(--panel-line)] bg-[var(--panel)] transition-colors hover:border-[var(--gold)]"
+              type="button"
+              onClick={() => onSelect(c.id)}
+              aria-label={`Build the ${c.colorLabel} colorway — ${c.legendName} ${c.legendNumber}`}
+              className="group relative block w-full overflow-hidden rounded-sm border border-[var(--panel-line)] bg-[var(--panel)] text-left transition-colors hover:border-[var(--gold)]"
             >
               <img
                 src={c.cardSrc}
@@ -41,11 +46,12 @@ export const HallOfFame = forwardRef<HTMLDivElement>(function HallOfFame(_props,
                 <span className="text-xs font-semibold uppercase tracking-[0.14em]">
                   {c.legendName} {c.legendNumber} — {c.colorLabel}
                 </span>
-                <span className="text-[0.65rem] uppercase tracking-[0.14em] text-[var(--muted)]">
-                  {c.country}
+                <span className="text-[0.65rem] uppercase tracking-[0.14em] text-[var(--muted)] transition-colors group-hover:text-[var(--gold)]">
+                  <span className="group-hover:hidden">{c.country}</span>
+                  <span className="hidden group-hover:inline">Build this kit →</span>
                 </span>
               </div>
-            </a>
+            </button>
           ))}
         </div>
       </div>

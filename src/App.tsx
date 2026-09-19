@@ -43,7 +43,7 @@ export function App() {
       />
       <Collection ref={collectionRef} selected={championId} onSelect={pickChampion} />
       <Configurator ref={configuratorRef} championId={championId} onChampionChange={setChampionId} />
-      <HallOfFame ref={hallRef} />
+      <HallOfFame ref={hallRef} onSelect={pickChampion} />
       <Footer
         onHome={scrollToTop}
         onCollection={scrollToCollection}

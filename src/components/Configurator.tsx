@@ -1,4 +1,4 @@
-import { forwardRef, useState, type HTMLAttributes } from "react";
+import { forwardRef, useEffect, useRef, useState, type HTMLAttributes } from "react";
 import {
   CHAMPIONS,
   NAME_MAX,
@@ -41,6 +41,19 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
   const [confirmed, setConfirmed] = useState(false);
   const [checkoutBusy, setCheckoutBusy] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+
+  // Below lg everything stacks, which pushes the price and the checkout
+  // button a couple of screens under the jersey. The bar keeps both on
+  // screen for as long as the configurator is.
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const [barVisible, setBarVisible] = useState(false);
+  useEffect(() => {
+    const el = bodyRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([entry]) => setBarVisible(entry.isIntersecting));
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   const champion = championById(championId);
   const price = priceFor(mode);
@@ -92,7 +105,7 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
   }
 
   return (
-    <section ref={ref} className="mx-auto max-w-[1400px] px-6 py-16 sm:px-10">
+    <section ref={ref} className="mx-auto max-w-[1400px] px-6 pb-28 pt-16 sm:px-10 lg:pb-16">
       <p className="text-[0.65rem] font-bold uppercase tracking-[0.3em] text-[var(--gold)]">Build yours</p>
 
       {/* Colorway swatches only — the collection strip above is the visual
@@ -119,7 +132,7 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
         ))}
       </div>
 
-      <div className="mt-10 grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
+      <div ref={bodyRef} className="mt-10 grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
         <div className="lg:sticky lg:top-10">
           <div className="mb-4 flex gap-6 border-b border-[var(--panel-line)] pb-3">
             {MODES.map((m) => (
@@ -139,47 +152,57 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
             ))}
           </div>
 
-          <JerseyCanvas
-            view={view}
-            frontSrc={champion.frontSrc}
-            backSrc={mode === "tribute" ? champion.backSrc : champion.blankBackSrc}
-            name={effectiveName}
-            number={effectiveNumber}
-            showOverlay={mode !== "tribute"}
-          />
-          <div className="mt-3 flex items-baseline justify-between gap-3">
-            <div className="flex items-baseline gap-4">
-              <button
-                type="button"
-                onClick={() => setView("front")}
-                aria-pressed={view === "front"}
-                className={`text-xs font-semibold uppercase tracking-[0.14em] transition-colors ${
-                  view === "front" ? "text-[var(--gold)]" : "text-[var(--muted)]"
-                }`}
+          {/* The plate is square and fills its column, so it runs about 740px
+              tall on a desktop viewport. Front/Back used to sit underneath it
+              as two small text links, which put the control below the fold
+              while the thing it controls was on screen. It rides the image
+              now, at the top edge rather than the bottom: the plate is taller
+              than a laptop viewport, so anything anchored to its bottom is
+              off screen the moment the jersey fills the window. */}
+          <div className="relative">
+            <JerseyCanvas
+              view={view}
+              frontSrc={champion.frontSrc}
+              backSrc={mode === "tribute" ? champion.backSrc : champion.blankBackSrc}
+              name={effectiveName}
+              number={effectiveNumber}
+              showOverlay={mode !== "tribute"}
+            />
+
+            <div className="pointer-events-none absolute inset-x-0 top-0 flex justify-end p-3 sm:p-4">
+              <div
+                className="pointer-events-auto flex items-center gap-1 rounded-full border border-white/10 bg-black/55 p-1 backdrop-blur-md"
+                role="group"
+                aria-label="Jersey view"
               >
-                Front
-              </button>
-              <button
-                type="button"
-                onClick={() => setView("back")}
-                aria-pressed={view === "back"}
-                className={`text-xs font-semibold uppercase tracking-[0.14em] transition-colors ${
-                  view === "back" ? "text-[var(--gold)]" : "text-[var(--muted)]"
-                }`}
-              >
-                Back
-              </button>
+                {(["front", "back"] as const).map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setView(v)}
+                    aria-pressed={view === v}
+                    className={`rounded-full px-5 py-2 text-[0.68rem] font-bold uppercase tracking-[0.16em] transition-colors ${
+                      view === v
+                        ? "bg-[var(--gold)] text-[var(--ink)]"
+                        : "text-[var(--cream)]/70 hover:text-[var(--cream)]"
+                    }`}
+                  >
+                    {v === "front" ? "Front" : "Back"}
+                  </button>
+                ))}
+              </div>
             </div>
-            <p className="text-xs text-[var(--muted)]">
-              {mode === "tribute"
-                ? "Real print — not editable"
-                : view === "front"
-                  ? "Front carries no name or number"
-                  : mode === "blank"
-                    ? "No name or number"
-                    : "Live name and number"}
-            </p>
           </div>
+
+          <p className="mt-3 text-center text-xs text-[var(--muted)]">
+            {mode === "tribute"
+              ? "Real print — not editable"
+              : view === "front"
+                ? "Front carries no name or number"
+                : mode === "blank"
+                  ? "No name or number"
+                  : "Live name and number"}
+          </p>
         </div>
 
         <div>
@@ -317,6 +340,29 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
             Tribute ${priceFor("tribute")} · Blank ${priceFor("blank")} · Custom ${priceFor("custom")} ·
             Stripe checkout
           </p>
+        </div>
+      </div>
+
+      <div
+        className={`fixed inset-x-0 bottom-0 z-40 border-t border-[var(--panel-line)] bg-[var(--ink)]/92 backdrop-blur-md transition-transform duration-300 lg:hidden ${
+          barVisible ? "translate-y-0" : "translate-y-full"
+        }`}
+      >
+        <div className="flex items-center gap-4 px-6 py-3">
+          <div className="min-w-0">
+            <p className="truncate text-[0.6rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+              {champion.legendName} · {mode === "tribute" ? "Tribute" : mode === "blank" ? "Blank" : "Custom"}
+            </p>
+            <p className="text-sm tabular-nums text-[var(--cream)]">${price}</p>
+          </div>
+          <button
+            type="button"
+            disabled={checkoutBusy}
+            onClick={() => void goNext()}
+            className="ml-auto shrink-0 bg-[var(--gold)] px-6 py-3 text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[var(--ink)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {nextLabel}
+          </button>
         </div>
       </div>
     </section>
