@@ -35,10 +35,22 @@ backgrounds — regenerate it from `logo.png` if the source art changes
 rather than hand-editing it), used in the nav, footer, and both order
 pages. `public/favicon.png` is cropped to just the chevron mark.
 
-`public/champions-hero.jpg` and `public/champions-<legend>-front.jpg`/
-`-back.jpg` (8 files: pele, robben, henry, reyna) are real product
-photography extracted at full resolution from "THE CHAMPIONS by No
-Parade FC" reference deck — not placeholders. Front plates never carry
+`public/champions-hero.jpg` is the campaign art, and `public/og.jpg` is
+the same frame cropped to 2400×1260 for social. The art carries its own
+NOPARADE / CHAMPIONS lockup, which is why the hero shows it whole at its
+native 1672:941 aspect on `md` and up and keeps the HTML `h1`
+screen-reader only there. The lockup sits at 64–96% of the frame width
+and overlaps the rightmost player vertically, so it cannot be cropped
+off with a straight vertical cut — below `md` the frame goes to 4:5 and
+`object-position: 30%` crops to the players, taking the baked lockup off
+frame, and the HTML lockup becomes visible in its place. If the art is
+ever re-cut, re-check that crop percentage against where the "C" of
+CHAMPIONS starts.
+
+`public/champions-<legend>-front.jpg`/`-back.jpg` (8 files: pele,
+robben, henry, reyna) are real product photography extracted at full
+resolution from "THE CHAMPIONS by No Parade FC" reference deck — not
+placeholders. Front plates never carry
 a name or number in this design (only the crest, `noparade` wordmark,
 and the Peace box); back plates in these 8 files have the legend's
 tribute print already baked in, which is why Tribute mode renders them
@@ -155,15 +167,21 @@ price from `mode`, never trusts a client-sent amount.
 - **Blank** — $118 (no name or number)
 - **Custom** — $138 (your own name + number, both required and valid)
 
-## Pending assets — placeholders in place, need real files
+## Liquid effects
 
-Nothing below blocks the app from working end-to-end; it blocks the
-*preview* from being pixel-accurate. Swap these in and nothing else
-needs to change:
+`styles.css` carries three motion pieces used by the hero, all
+opacity/transform only and all disabled under `prefers-reduced-motion`:
 
-- **OG card.** `public/og.jpg` still carries the old Build Your Crest
-  headline — regenerate it against The Champions when there's a moment;
-  the site works fine without it.
+- `.liquid-field` — two blurred colour blobs (gold, stadium blue) drifting
+  across the art on long offset cycles, `mix-blend-mode: screen`.
+- `.liquid-sheen` — a single bright pass crossing the frame, like a
+  stadium light sweeping through.
+- `.liquid-glass` — frosted panel (`backdrop-filter`) for anything laid
+  over the art; `.liquid-btn` gives the primary action a fluid sweep on
+  hover.
+
+Keep these subtle. The measured delta between two hero frames is ~13/255
+at peak — enough to feel alive, not enough to read as an animation.
 
 ## What checkout captures
 
