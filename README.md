@@ -45,11 +45,19 @@ tribute print already baked in, which is why Tribute mode renders them
 as a plain photo (`JerseyCanvas`'s `showOverlay={false}`) rather than
 compositing live text on top of them.
 
-`public/champions-<legend>-back-blank.jpg` (4 files) are real nameless
-back photography for all four colorways — the plate Blank mode shows
-as-is, and the plate Custom mode overlays the typed name/number onto
-live. Same camera angle and crop as the tribute back photos, so
-`JERSEY_LAYOUT` (`src/lib/kit.ts`) applies to both consistently.
+`public/champions-<legend>-back-blank.jpg` (4 files) are flat-lay
+nameless backs — the plate Blank mode shows as-is, and the plate Custom
+mode overlays the typed name/number onto live. Flat lays are used here
+rather than the turned 3/4 product shots because the print area is
+undistorted and symmetric, so custom input reads clearly.
+
+They are normalized before being committed: each source flat lay is
+scaled and positioned so the garment occupies an identical box (center
+x at 50%, top at 5%, height 90% of the square canvas). The sources were
+framed at slightly different scales, and without that pass one layout
+could not land identically on all four. `normalize.js` is not kept in
+the repo — if a plate is ever re-shot, re-normalize it to that same
+garment box rather than adjusting `JERSEY_LAYOUT` per colorway.
 
 `public/fonts/france-wc-2026-away.otf` ("France WC 2026 Away") is the
 real jersey lettering face — full A–Z, 0–9, and accented coverage
@@ -60,20 +68,21 @@ baked into the real photo.
 
 ## How the custom overlay is calibrated
 
-Custom input is meant to land exactly where the tribute print lands,
-and `JERSEY_LAYOUT` in `src/lib/kit.ts` is derived rather than
-eyeballed. The tribute photo and the blank plate are the same product
-shot — one printed, one not — so:
+Custom input is meant to sit where the real tribute print sits, and
+`JERSEY_LAYOUT` in `src/lib/kit.ts` is derived rather than eyeballed:
 
 1. The painted ink box of the tribute print (`ROBBEN` / `11`) was
-   measured out of the tribute photo.
-2. That box was mapped into the blank plate's frame using each photo's
-   garment bounding box (the two exports differ by ~2.7% in scale).
+   measured out of the tribute photo, and expressed as a fraction of
+   that garment's own bounding box.
+2. Those vertical fractions were transferred onto the normalized
+   flat-lay plate. Vertical proportions carry across a horizontally
+   turned pose; horizontal ones do not, which is why `centerX` is
+   simply 50 — the flat lay is symmetric — rather than transferred.
 3. The live overlay was then rendered and re-measured — by diffing a
    Custom-mode screenshot against a Blank-mode screenshot of the same
    plate, which isolates the overlay exactly — and the CSS was solved
-   against the target box, iterating until every edge landed within a
-   pixel.
+   against the target box until every edge landed within ~0.15% of
+   the plate.
 
 Two consequences worth keeping:
 
@@ -81,10 +90,8 @@ Two consequences worth keeping:
   `object-contain` a percentage in `JERSEY_LAYOUT` maps 1:1 onto the
   photo. Any other container ratio letterboxes the photo and silently
   shifts every overlay position.
-- `name` and `number` carry their own `centerX` and `trackingEm`. The
-  plates are shot at a turned 3/4 angle, so the print centerline is
-  not one fixed x% down the whole plate, and the real print is set
-  looser than the font's default spacing.
+- `name` and `number` carry their own `trackingEm`: the real print is
+  set looser than the font's default spacing.
 
 Long names scale to fit: `useInkMetrics` measures the painted width on
 an offscreen canvas and the overlay scales down once it would exceed

@@ -132,8 +132,8 @@ export type JerseyLayout = {
 };
 
 export const JERSEY_LAYOUT: JerseyLayout = {
-  name: { centerX: 55.67, y: 17.3, heightPct: 10.07, maxWidthPct: 30, trackingEm: 0.059 },
-  number: { centerX: 55.9, y: 24.3, heightPct: 38.29, trackingEm: 0.088 },
+  name: { centerX: 50, y: 18.86, heightPct: 9.36, maxWidthPct: 34, trackingEm: 0.059 },
+  number: { centerX: 50, y: 25.63, heightPct: 35.24, trackingEm: 0.088 },
 };
 
 /**
