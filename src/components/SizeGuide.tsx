@@ -20,7 +20,7 @@ export function SizeGuide({ open, onClose }: Props) {
       <div
         role="dialog"
         aria-label="Size guide"
-        className="relative w-full max-w-md border border-[var(--panel-line)] bg-[var(--ink)] px-6 py-6 sm:rounded-sm"
+        className="relative w-full max-w-md border border-[var(--line)] bg-[var(--bg)] px-6 py-6 sm:rounded-sm"
       >
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -31,7 +31,7 @@ export function SizeGuide({ open, onClose }: Props) {
           </div>
           <button
             onClick={onClose}
-            className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)] transition-colors hover:text-[var(--cream)]"
+            className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)] transition-colors hover:text-[var(--fg)]"
           >
             Close
           </button>
@@ -39,16 +39,16 @@ export function SizeGuide({ open, onClose }: Props) {
 
         <table className="mt-5 w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-[var(--panel-line)] text-[0.62rem] uppercase tracking-[0.18em] text-[var(--muted)]">
+            <tr className="border-b border-[var(--line)] text-[0.62rem] uppercase tracking-[0.18em] text-[var(--muted)]">
               <th className="pb-2 font-semibold">Size</th>
               <th className="pb-2 font-semibold">Chest</th>
               <th className="pb-2 font-semibold">Length</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[var(--panel-line)]">
+          <tbody className="divide-y divide-[var(--line)]">
             {SIZE_GUIDE.map((row) => (
               <tr key={row.size}>
-                <td className="py-2.5 font-semibold text-[var(--cream)]">{row.size}</td>
+                <td className="py-2.5 font-semibold text-[var(--fg)]">{row.size}</td>
                 <td className="py-2.5 tabular-nums text-[var(--muted)]">{row.chest}"</td>
                 <td className="py-2.5 tabular-nums text-[var(--muted)]">{row.length}"</td>
               </tr>
@@ -62,7 +62,7 @@ export function SizeGuide({ open, onClose }: Props) {
         </p>
 
         {SIZE_GUIDE_IS_PLACEHOLDER && (
-          <p className="mt-4 border-t border-[var(--panel-line)] pt-4 text-xs leading-relaxed text-[var(--gold)]">
+          <p className="mt-4 border-t border-[var(--line)] pt-4 text-xs leading-relaxed text-[var(--gold)]">
             These are standard match-shirt measurements, not this garment's measured spec. Confirm
             before ordering.
           </p>

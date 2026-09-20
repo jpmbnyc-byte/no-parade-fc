@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { JERSEY_FONT_FAMILY, JERSEY_LAYOUT } from "@/lib/kit";
+import { JERSEY_FONT_FAMILY, JERSEY_LAYOUT, plateSrcSet } from "@/lib/kit";
 import { useInkMetrics } from "@/lib/useInkMetrics";
 
 export type CanvasView = "front" | "back";
@@ -67,7 +67,7 @@ export function JerseyCanvas({
 
   if (showBack && !backSrc) {
     return (
-      <figure className="relative flex aspect-square w-full flex-col items-center justify-center gap-3 overflow-hidden rounded-sm border border-dashed border-[var(--panel-line)] bg-[var(--panel)] px-8 text-center">
+      <figure className="relative flex aspect-square w-full flex-col items-center justify-center gap-3 overflow-hidden rounded-sm border border-dashed border-[var(--line)] bg-[var(--surface)] px-8 text-center">
         <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
           Back view — pending blank plate photography
         </p>
@@ -79,16 +79,32 @@ export function JerseyCanvas({
 
   return (
     <figure
-      // No panel fill or frame: the plates are knocked out, so the garment
-      // floats directly on the page instead of sitting in a box.
-      className="relative aspect-square w-full"
+      // The plates are knocked out, so on a light ground they need a tile
+      // with some depth under them or they read as stickers. The garment
+      // itself carries an alpha-shaped drop shadow (.product-shadow on the
+      // img below), which is what sells it as a photographed object.
+      className="product-tile relative aspect-square w-full overflow-hidden rounded-[2px] border border-[var(--line)]"
       style={{ containerType: "size" }}
     >
       <img
         key={src}
         src={src}
+        // Same rendered box at every width, so this cannot move the overlay:
+        // it only changes which pixels fill it. The plate renders ~740px on a
+        // desktop and ~342px on a phone; the full file is 1254px.
+        srcSet={plateSrcSet(src)}
+        sizes="(min-width: 1024px) 740px, 92vw"
         alt={`No Parade F.C. jersey, ${view} view`}
-        className="absolute inset-0 h-full w-full object-contain object-center"
+        // Two screens below the fold on first paint, and the full plates are
+        // ~150KB each. Native lazy loading starts well before it scrolls in.
+        loading="lazy"
+        decoding="async"
+        // Never scale or pad this image. JERSEY_LAYOUT's percentages are
+        // measured against the container, and the plate fills it exactly
+        // (square in square, object-contain), so any transform here walks
+        // the live name and number off the print area. The shadow is a
+        // filter, which does not touch layout.
+        className="product-shadow absolute inset-0 h-full w-full object-contain object-center"
         draggable={false}
         onLoad={(e) => {
           const el = e.currentTarget;

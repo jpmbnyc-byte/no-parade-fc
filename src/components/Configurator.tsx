@@ -136,19 +136,22 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
               // Keep the side you were working on: in Custom that is the back.
               setView(mode === "custom" ? "back" : "front");
             }}
+            // Never dim these. Fading the unselected swatches worked on a
+            // dark ground; on white it turns Orange into peach and Black into
+            // grey, which misreports the product. Selection is the ring.
             className={`size-7 rounded-full transition-all duration-200 ${
               championId === c.id
-                ? "ring-1 ring-[var(--gold)] ring-offset-4 ring-offset-[var(--ink)]"
-                : "opacity-55 hover:opacity-100"
+                ? "ring-1 ring-[var(--fg)] ring-offset-4 ring-offset-[var(--bg)]"
+                : "hover:ring-1 hover:ring-[var(--muted)] hover:ring-offset-4 hover:ring-offset-[var(--bg)]"
             }`}
-            style={{ background: c.swatch, boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.18)" }}
+            style={{ background: c.swatch, boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.18)" }}
           />
         ))}
       </div>
 
       <div ref={bodyRef} className="mt-10 grid gap-x-10 gap-y-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-start lg:gap-y-10">
         <div className="lg:sticky lg:top-10">
-          <div className="mb-4 flex gap-6 border-b border-[var(--panel-line)] pb-3">
+          <div className="mb-4 flex gap-6 border-b border-[var(--line)] pb-3">
             {MODES.map((m) => (
               <button
                 key={m}
@@ -162,8 +165,8 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
                 aria-pressed={mode === m}
                 className={`-mb-[13px] border-b pb-3 text-[0.68rem] font-semibold uppercase tracking-[0.2em] transition-colors ${
                   mode === m
-                    ? "border-[var(--gold)] text-[var(--gold)]"
-                    : "border-transparent text-[var(--muted)] hover:text-[var(--cream)]"
+                    ? "border-[var(--fg)] text-[var(--fg)]"
+                    : "border-transparent text-[var(--muted)] hover:text-[var(--fg)]"
                 }`}
               >
                 {m === "tribute" ? "Tribute" : m === "blank" ? "Blank" : "Custom"}
@@ -171,13 +174,11 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
             ))}
           </div>
 
-          {/* Front/Back sits above the plate, not on it. It was an overlay
-              pill riding the top edge, which landed square on the collar of
-              every garment; before that it was text under a plate that runs
-              ~740px tall on a laptop, which put it below the fold. Its own
-              row costs ~40px and is always both visible and clear of the art. */}
+          {/* Caption only; the view control is the thumbnail rail under the
+              plate, which is how a product page does this — you pick the
+              shot you want to look at rather than toggling an abstraction. */}
           <div className="mb-3 flex items-center justify-between gap-4">
-            <p className="text-xs text-[var(--muted)]">
+            <p className="text-[0.62rem] uppercase tracking-[0.16em] text-[var(--muted)]">
               {mode === "tribute"
                 ? "Real print — not editable"
                 : view === "front"
@@ -186,27 +187,9 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
                     ? "No name or number"
                     : "Live name and number"}
             </p>
-            <div
-              className="flex shrink-0 items-center gap-1 rounded-full border border-[var(--panel-line)] bg-[var(--panel)] p-1"
-              role="group"
-              aria-label="Jersey view"
-            >
-              {(["front", "back"] as const).map((v) => (
-                <button
-                  key={v}
-                  type="button"
-                  onClick={() => setView(v)}
-                  aria-pressed={view === v}
-                  className={`rounded-full px-4 py-1.5 text-[0.66rem] font-bold uppercase tracking-[0.16em] transition-colors ${
-                    view === v
-                      ? "bg-[var(--gold)] text-[var(--ink)]"
-                      : "text-[var(--muted)] hover:text-[var(--cream)]"
-                  }`}
-                >
-                  {v === "front" ? "Front" : "Back"}
-                </button>
-              ))}
-            </div>
+            <p className="text-[0.62rem] uppercase tracking-[0.16em] text-[var(--muted)]">
+              {view === "front" ? "1 / 2" : "2 / 2"}
+            </p>
           </div>
 
           <JerseyCanvas
@@ -218,6 +201,42 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
             showOverlay={mode !== "tribute"}
           />
 
+          <div className="mt-3 flex gap-3" role="group" aria-label="Jersey view">
+            {([
+              // 400px variants: these render at 80-96px, and the full plates
+              // are ~150KB each.
+              { v: "front" as const, src: champion.thumbSrc, label: "Front" },
+              {
+                v: "back" as const,
+                src: mode === "tribute" ? champion.thumbTributeBackSrc : champion.thumbBackSrc,
+                label: "Back",
+              },
+            ]).map(({ v, src, label }) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => setView(v)}
+                aria-pressed={view === v}
+                aria-label={`${label} view`}
+                className={`product-tile relative size-20 overflow-hidden rounded-[2px] border transition-colors sm:size-24 ${
+                  view === v
+                    ? "border-[var(--fg)]"
+                    : "border-[var(--line)] hover:border-[var(--muted)]"
+                }`}
+              >
+                <img
+                  src={src}
+                  width={400}
+                  height={400}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="absolute inset-0 size-full scale-90 object-contain"
+                />
+              </button>
+            ))}
+          </div>
+
         </div>
 
         <div className="flex flex-col">
@@ -227,7 +246,7 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
                 plate at both sizes does not work — the desktop plate runs
                 ~740px tall, so anything below it starts off screen. */}
             {mode === "custom" && (
-              <div className="order-1 border-b border-[var(--panel-line)] pb-5 lg:order-2 lg:mt-6 lg:border-b-0 lg:border-t lg:pb-0 lg:pt-5">
+              <div className="order-1 border-b border-[var(--line)] pb-5 lg:order-2 lg:mt-6 lg:border-b-0 lg:border-t lg:pb-0 lg:pt-5">
                 <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
                   Name and number
                 </p>
@@ -280,7 +299,7 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
                 </button>
               </div>
             )}
-            <div id="field-size" className="order-1 mt-5 border-b border-[var(--panel-line)] pb-5 lg:order-2 lg:border-b-0 lg:border-t lg:pb-0 lg:pt-5">
+            <div id="field-size" className="order-1 mt-5 border-b border-[var(--line)] pb-5 lg:order-2 lg:border-b-0 lg:border-t lg:pb-0 lg:pt-5">
               <div className="flex items-baseline justify-between gap-4">
                 <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
                   Size
@@ -294,7 +313,7 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
                   <button
                     type="button"
                     onClick={() => setGuideOpen(true)}
-                    className="text-[0.65rem] uppercase tracking-[0.14em] text-[var(--muted)] underline underline-offset-4 transition-colors hover:text-[var(--cream)]"
+                    className="text-[0.65rem] uppercase tracking-[0.14em] text-[var(--muted)] underline underline-offset-4 transition-colors hover:text-[var(--fg)]"
                   >
                     Size guide
                   </button>
@@ -309,8 +328,8 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
                     aria-pressed={size === sz}
                     className={`border px-1 py-2.5 text-xs font-bold uppercase tracking-[0.06em] transition-colors ${
                       size === sz
-                        ? "border-[var(--gold)] bg-[var(--gold)] text-[var(--ink)]"
-                        : "border-[var(--panel-line)] text-[var(--cream)] hover:border-[var(--muted)]"
+                        ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-fg)]"
+                        : "border-[var(--line)] text-[var(--fg)] hover:border-[var(--muted)]"
                     }`}
                   >
                     {sz}
@@ -337,7 +356,7 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
             <span>{champion.country}</span>
           </div>
           <p
-            className="mt-5 text-[1.35rem] italic leading-snug text-[var(--cream)]"
+            className="mt-5 text-[1.35rem] italic leading-snug text-[var(--fg)]"
             style={{ fontFamily: "var(--font-display)" }}
           >
             {champion.tagline}
@@ -369,7 +388,7 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
 
           </div>
 
-          <section id="field-confirm" className="order-3 mt-8 border-t border-[var(--panel-line)] pt-6">
+          <section id="field-confirm" className="order-3 mt-8 border-t border-[var(--line)] pt-6">
             <label className="flex items-start gap-3 text-sm leading-snug text-[var(--muted)]">
               <input
                 type="checkbox"
@@ -385,7 +404,7 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
             </label>
           </section>
 
-          <div className="order-3 mt-6 flex items-baseline justify-between gap-4 border-b border-[var(--panel-line)] pb-3">
+          <div className="order-3 mt-6 flex items-baseline justify-between gap-4 border-b border-[var(--line)] pb-3">
             <span className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
               {mode === "tribute" ? "Tribute" : mode === "blank" ? "Blank" : "Custom"}
             </span>
@@ -396,7 +415,7 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
             ref={ctaRef}
             type="button"
             onClick={goNext}
-            className="liquid-btn order-3 mt-5 w-full bg-[var(--gold)] py-3.5 text-xs font-bold uppercase tracking-[0.14em] text-[var(--ink)] transition-opacity hover:opacity-90"
+            className="liquid-btn order-3 mt-5 w-full bg-[var(--accent)] py-3.5 text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[var(--accent-fg)] transition-opacity hover:opacity-90"
           >
             {nextLabel}
           </button>
@@ -410,7 +429,7 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
       <SizeGuide open={guideOpen} onClose={() => setGuideOpen(false)} />
 
       <div
-        className={`fixed inset-x-0 bottom-0 z-40 border-t border-[var(--panel-line)] bg-[var(--ink)]/92 backdrop-blur-md transition-transform duration-300 lg:hidden ${
+        className={`fixed inset-x-0 bottom-0 z-40 border-t border-[var(--line)] bg-[var(--bg)]/92 backdrop-blur-md transition-transform duration-300 lg:hidden ${
           barVisible ? "translate-y-0" : "translate-y-full"
         }`}
       >
@@ -420,12 +439,12 @@ export const Configurator = forwardRef<HTMLDivElement, Props>(function Configura
               {champion.legendName} · {mode === "tribute" ? "Tribute" : mode === "blank" ? "Blank" : "Custom"}
               {size ? ` · ${size}` : ""}
             </p>
-            <p className="text-sm tabular-nums text-[var(--cream)]">${price}</p>
+            <p className="text-sm tabular-nums text-[var(--fg)]">${price}</p>
           </div>
           <button
             type="button"
             onClick={goNext}
-            className="ml-auto shrink-0 bg-[var(--gold)] px-6 py-3 text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[var(--ink)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="ml-auto shrink-0 bg-[var(--accent)] px-6 py-3 text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[var(--accent-fg)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {nextLabel}
           </button>
@@ -460,9 +479,9 @@ function OutlinedField({
     <div>
       <label
         htmlFor={id}
-        className="relative flex min-h-[4.5rem] flex-col border border-[var(--panel-line)] bg-transparent px-3 pb-2 pt-3 focus-within:border-[var(--gold)]"
+        className="relative flex min-h-[4.5rem] flex-col border border-[var(--line)] bg-transparent px-3 pb-2 pt-3 focus-within:border-[var(--gold)]"
       >
-        <span className="absolute -top-2 left-2 bg-[var(--ink)] px-1 text-xs font-medium text-[var(--muted)]">
+        <span className="absolute -top-2 left-2 bg-[var(--bg)] px-1 text-xs font-medium text-[var(--muted)]">
           {label}
         </span>
         <input
@@ -472,7 +491,7 @@ function OutlinedField({
           inputMode={inputMode}
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full min-w-0 flex-1 bg-transparent text-2xl font-semibold uppercase tracking-wide text-[var(--cream)] outline-none placeholder:text-[var(--muted)]"
+          className="w-full min-w-0 flex-1 bg-transparent text-2xl font-semibold uppercase tracking-wide text-[var(--fg)] outline-none placeholder:text-[var(--muted)]"
           autoComplete="off"
           spellCheck={false}
           aria-describedby={`${id}-counter`}

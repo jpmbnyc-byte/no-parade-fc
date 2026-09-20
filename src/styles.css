@@ -8,24 +8,43 @@
 }
 
 :root {
-  /* Native controls (the confirm checkbox) render light-on-white by default,
-     which reads as a bare white square against this palette. */
-  color-scheme: dark;
-  /* Warm near-black, not blue-black. Every image on this site — the campaign
-     art, the Hall of Fame cards — is warm; a cool ground made both look off. */
-  --ink: #0c0a09;
-  --panel: #15120f;
-  --panel-line: rgba(245, 240, 230, 0.12);
-  --cream: #f4efe4;
-  --muted: rgba(244, 239, 228, 0.55);
-  --gold: #c9a961;
-  --gold-dim: rgba(201, 169, 97, 0.35);
+  color-scheme: light;
+
+  /* Retail light. The garments carry every colour on the page; the interface
+     is black, white and grey so nothing competes with them. Gold survives
+     only as a small editorial accent, at a value that actually passes
+     contrast on white — the old #c9a961 does not. */
+  --bg: #ffffff;
+  --surface: #f5f4f1;
+  --surface-2: #ebe9e4;
+  --fg: #0b0b0b;
+  --muted: #6b6b6b;
+  --line: #e3e1db;
+
+  /* Primary action: black on white, like every serious shop. */
+  --accent: #0b0b0b;
+  --accent-fg: #ffffff;
+
+  --gold: #8a6d20;
+  --gold-dim: rgba(138, 109, 32, 0.3);
+
+  /* For text and chrome that sits on top of dark imagery — the hero art and
+     the announcement bar — where --fg would disappear. */
+  --on-dark: #ffffff;
+  --on-dark-muted: rgba(255, 255, 255, 0.72);
+
   --font-display: "Playfair Display", Georgia, serif;
   --font-body: "Manrope", "Helvetica Neue", sans-serif;
 }
 
 * {
   box-sizing: border-box;
+}
+
+/* The header is sticky, so an anchor scrolled to the top of the viewport
+   lands underneath it. Every in-page jump on this site targets a section. */
+section {
+  scroll-margin-top: 6rem;
 }
 
 html,
@@ -36,15 +55,15 @@ body,
 
 body {
   margin: 0;
-  background: var(--ink);
-  color: var(--cream);
+  background: var(--bg);
+  color: var(--fg);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
 }
 
 ::selection {
-  background: var(--gold);
-  color: var(--ink);
+  background: var(--fg);
+  color: var(--bg);
 }
 
 /* ---------------------------------------------------------------
@@ -141,8 +160,9 @@ body {
 }
 
 /* Frosted panel for anything laid over the art. */
+/* Sits on top of the dark hero art only — not a general page panel. */
 .liquid-glass {
-  background: rgba(18, 22, 30, 0.42);
+  background: rgba(10, 10, 10, 0.5);
   backdrop-filter: blur(20px) saturate(1.35);
   -webkit-backdrop-filter: blur(20px) saturate(1.35);
   border: 1px solid rgba(244, 239, 228, 0.14);
@@ -191,5 +211,49 @@ body {
   }
   .liquid-btn::after {
     transition: none;
+  }
+}
+
+
+/* ---------------------------------------------------------------
+   Product presentation
+   The plates are knocked-out garments on transparency. On a light
+   tile a drop-shadow follows the alpha silhouette rather than a
+   bounding box, which is what makes a cut-out read as a photographed
+   object sitting on a sweep instead of a sticker pasted on a card.
+   --------------------------------------------------------------- */
+
+.product-tile {
+  background:
+    radial-gradient(120% 90% at 50% 8%, #ffffff 0%, var(--surface) 55%, var(--surface-2) 100%);
+}
+
+.product-shadow {
+  filter: drop-shadow(0 18px 22px rgba(15, 15, 15, 0.18))
+          drop-shadow(0 3px 6px rgba(15, 15, 15, 0.12));
+}
+
+/* Marquee for the announcement bar. Duplicated content scrolls a single
+   copy's width, so the loop is seamless. Stops under reduced motion, where
+   the bar becomes a plain centred line instead. */
+@keyframes np-marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+
+.marquee {
+  display: flex;
+  width: max-content;
+  animation: np-marquee 38s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee {
+    animation: none;
+    width: 100%;
+    justify-content: center;
+  }
+  .marquee > :nth-child(n + 2) {
+    display: none;
   }
 }

@@ -31,6 +31,12 @@ export type Champion = {
   blankBackSrc: string;
   /** Hall of Fame campaign card — editorial art, shown in its own section, not in the configurator. */
   cardSrc: string;
+  /** 400px front plate for the collection grid and bag thumbnails. */
+  thumbSrc: string;
+  /** 400px blank back, for the grid's hover swap. */
+  thumbBackSrc: string;
+  /** 400px tribute back, for the configurator's thumbnail rail. */
+  thumbTributeBackSrc: string;
 };
 
 export const CHAMPIONS: Champion[] = [
@@ -44,9 +50,12 @@ export const CHAMPIONS: Champion[] = [
     tagline: "The beauty of what's possible.",
     bio: "Pelé represents football at its most universal. He became a World Cup winner at 17 and remains the only player to win three World Cups. But the legacy goes beyond trophies: Pelé turned the No. 10 into a symbol of imagination, excellence and possibility. This jersey honors the player who helped make football a global language.",
     frontSrc: "/champions-pele-front.webp",
+    thumbSrc: "/champions-pele-front-400.webp",
+    thumbBackSrc: "/champions-pele-back-blank-400.webp",
+    thumbTributeBackSrc: "/champions-pele-back-400.webp",
     backSrc: "/champions-pele-back.webp",
     blankBackSrc: "/champions-pele-back-blank.webp",
-    cardSrc: "/champions-pele-card.jpg",
+    cardSrc: "/champions-pele-card.webp",
   },
   {
     id: "robben",
@@ -58,9 +67,12 @@ export const CHAMPIONS: Champion[] = [
     tagline: "Power. Precision. Impact.",
     bio: "Arjen Robben built a career around one unmistakable idea: give him the ball and make him stop you. Pace, precision and relentless confidence defined his game. From the Netherlands to the biggest nights in European football, Robben made the No. 11 feel like an instrument of attack — direct, recognizable and impossible to ignore.",
     frontSrc: "/champions-robben-front.webp",
+    thumbSrc: "/champions-robben-front-400.webp",
+    thumbBackSrc: "/champions-robben-back-blank-400.webp",
+    thumbTributeBackSrc: "/champions-robben-back-400.webp",
     backSrc: "/champions-robben-back.webp",
     blankBackSrc: "/champions-robben-back-blank.webp",
-    cardSrc: "/champions-robben-card.jpg",
+    cardSrc: "/champions-robben-card.webp",
   },
   {
     id: "henry",
@@ -72,9 +84,12 @@ export const CHAMPIONS: Champion[] = [
     tagline: "Elegance. Strength. Leadership.",
     bio: "Thierry Henry made elegance look dangerous. His combination of speed, intelligence and finishing helped define a generation of football, from France's World Cup triumph to his dominance at club level. The No. 12 becomes a tribute to a player who showed that power doesn't always have to announce itself.",
     frontSrc: "/champions-henry-front.webp",
+    thumbSrc: "/champions-henry-front-400.webp",
+    thumbBackSrc: "/champions-henry-back-blank-400.webp",
+    thumbTributeBackSrc: "/champions-henry-back-400.webp",
     backSrc: "/champions-henry-back.webp",
     blankBackSrc: "/champions-henry-back-blank.webp",
-    cardSrc: "/champions-henry-card.jpg",
+    cardSrc: "/champions-henry-card.webp",
   },
   {
     id: "ballack",
@@ -86,9 +101,12 @@ export const CHAMPIONS: Champion[] = [
     tagline: "Leadership. Passion. Legacy.",
     bio: "Michael Ballack represented a different kind of excellence — power, leadership and an instinct for the biggest moments. He won the Bundesliga and DFB-Pokal three times with Bayern Munich, completing three league-and-cup doubles between 2003 and 2006. At Chelsea, he added the Premier League, three FA Cups and the League Cup, while leading Germany as captain through a defining era of international football.",
     frontSrc: "/champions-ballack-front.webp",
+    thumbSrc: "/champions-ballack-front-400.webp",
+    thumbBackSrc: "/champions-ballack-back-blank-400.webp",
+    thumbTributeBackSrc: "/champions-ballack-back-400.webp",
     backSrc: "/champions-ballack-back.webp",
     blankBackSrc: "/champions-ballack-back-blank.webp",
-    cardSrc: "/champions-ballack-card.jpg",
+    cardSrc: "/champions-ballack-card.webp",
   },
 ];
 
@@ -148,6 +166,9 @@ export const MODE_LABEL: Record<Mode, string> = {
 };
 
 /** Tribute (legend's exact print) > Custom (your name + number) > Blank (neither). */
+/** Threshold quoted in the announcement bar and the footer. */
+export const FREE_SHIPPING_OVER = 250;
+
 export const TRIBUTE_PRICE = 148;
 export const PRICE = 118;
 export const PERSONALIZED_PRICE = 138;
@@ -193,6 +214,17 @@ export const JERSEY_LAYOUT: JerseyLayout = {
  * Blank/Custom mode — Tribute mode never uses it since that print is
  * already baked into the real photo.
  */
+/**
+ * Plate variants follow one naming convention, written by
+ * tools/optimize-assets.cjs: "<base>.webp" plus "<base>-400.webp" and
+ * "<base>-800.webp". Building the srcset here keeps every consumer from
+ * hard-coding the widths.
+ */
+export function plateSrcSet(src: string): string {
+  const base = src.replace(/\.webp$/, "");
+  return `${base}-400.webp 400w, ${base}-800.webp 800w, ${src} 1254w`;
+}
+
 export const JERSEY_FONT_FAMILY = "'France WC 2026', 'Manrope', sans-serif";
 
 export function sanitizeName(raw: string): string {

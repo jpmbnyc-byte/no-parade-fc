@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { TopBar } from "@/components/TopBar";
 import { Hero } from "@/components/Hero";
 import { Collection } from "@/components/Collection";
 import { Configurator } from "@/components/Configurator";
@@ -39,14 +40,16 @@ export function App() {
 
   return (
     <div>
-      <Hero
+      <TopBar
         onHome={scrollToTop}
         onCollection={scrollToCollection}
         onBuild={scrollToConfigurator}
         onHall={scrollToHall}
         bagCount={cart.count}
+        subtotal={cart.subtotal}
         onBag={() => setBagOpen(true)}
       />
+      <Hero onBuild={scrollToConfigurator} onCollection={scrollToCollection} />
       <Collection ref={collectionRef} selected={championId} onSelect={pickChampion} />
       <Configurator
         ref={configuratorRef}

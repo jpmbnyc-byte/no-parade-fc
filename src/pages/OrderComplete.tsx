@@ -22,7 +22,7 @@ export function OrderComplete() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-6 text-center">
-      <img src="/logo-white.png" alt="No Parade F.C." className="h-6 w-auto" />
+      <img src="/logo.webp" alt="No Parade F.C." width={480} height={42} className="h-5 w-auto" />
       <p className="mt-8 text-xs font-bold uppercase tracking-[0.28em] text-[var(--gold)]">Order confirmed</p>
       <h1 className="mt-4 text-3xl" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>
         Peace be with you.
@@ -30,7 +30,7 @@ export function OrderComplete() {
       {loading ? (
         <p className="mt-6 text-sm text-[var(--muted)]">Loading your order…</p>
       ) : order ? (
-        <div className="mt-8 w-full border border-[var(--panel-line)] p-6 text-left text-sm">
+        <div className="mt-8 w-full border border-[var(--line)] p-6 text-left text-sm">
           <p className="text-[var(--muted)]">{order.description}</p>
           {order.amountTotal != null ? (
             <p className="mt-2 font-bold">${(order.amountTotal / 100).toFixed(2)}</p>

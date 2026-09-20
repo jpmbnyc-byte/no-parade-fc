@@ -60,18 +60,18 @@ export function Bag({ open, items, subtotal, onClose, onRemove }: Props) {
       <aside
         role="dialog"
         aria-label="Your bag"
-        className={`absolute inset-y-0 right-0 flex w-full max-w-[26rem] flex-col border-l border-[var(--panel-line)] bg-[var(--ink)] transition-transform duration-300 ease-out ${
+        className={`absolute inset-y-0 right-0 flex w-full max-w-[26rem] flex-col border-l border-[var(--line)] bg-[var(--bg)] transition-transform duration-300 ease-out ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <header className="flex items-center justify-between border-b border-[var(--panel-line)] px-6 py-5">
+        <header className="flex items-center justify-between border-b border-[var(--line)] px-6 py-5">
           <p className="text-[0.65rem] font-bold uppercase tracking-[0.3em] text-[var(--gold)]">
             Your bag
           </p>
           <button
             onClick={onClose}
             tabIndex={open ? 0 : -1}
-            className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)] transition-colors hover:text-[var(--cream)]"
+            className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)] transition-colors hover:text-[var(--fg)]"
           >
             Close
           </button>
@@ -89,20 +89,22 @@ export function Bag({ open, items, subtotal, onClose, onRemove }: Props) {
             </button>
           </div>
         ) : (
-          <ul className="flex-1 divide-y divide-[var(--panel-line)] overflow-y-auto">
+          <ul className="flex-1 divide-y divide-[var(--line)] overflow-y-auto">
             {items.map((item) => {
               const champion = championById(item.championId);
               const print = itemPrint(item);
               return (
                 <li key={item.key} className="flex gap-4 px-6 py-5">
                   <img
-                    src={champion.frontSrc}
+                    src={champion.thumbSrc}
                     alt=""
-                    className="size-16 shrink-0 object-contain"
+                    width={400}
+                    height={400}
+                    className="size-16 shrink-0 rounded-[2px] bg-[var(--surface)] object-contain p-1"
                     loading="lazy"
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--cream)]">
+                    <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--fg)]">
                       {itemLabel(item)}
                     </p>
                     {print && (
@@ -113,12 +115,12 @@ export function Bag({ open, items, subtotal, onClose, onRemove }: Props) {
                     <button
                       onClick={() => onRemove(item.key)}
                       tabIndex={open ? 0 : -1}
-                      className="mt-2 text-[0.68rem] text-[var(--muted)] underline underline-offset-4 transition-colors hover:text-[var(--cream)]"
+                      className="mt-2 text-[0.68rem] text-[var(--muted)] underline underline-offset-4 transition-colors hover:text-[var(--fg)]"
                     >
                       Remove
                     </button>
                   </div>
-                  <span className="shrink-0 text-sm tabular-nums text-[var(--cream)]">
+                  <span className="shrink-0 text-sm tabular-nums text-[var(--fg)]">
                     ${itemPrice(item)}
                   </span>
                 </li>
@@ -128,12 +130,12 @@ export function Bag({ open, items, subtotal, onClose, onRemove }: Props) {
         )}
 
         {items.length > 0 && (
-          <footer className="border-t border-[var(--panel-line)] px-6 py-5">
+          <footer className="border-t border-[var(--line)] px-6 py-5">
             <div className="flex items-baseline justify-between">
               <span className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
                 Subtotal
               </span>
-              <span className="text-lg tabular-nums text-[var(--cream)]">${subtotal}</span>
+              <span className="text-lg tabular-nums text-[var(--fg)]">${subtotal}</span>
             </div>
             <p className="mt-1 text-[0.65rem] text-[var(--muted)]">
               Shipping and any duties are calculated at checkout.
@@ -147,7 +149,7 @@ export function Bag({ open, items, subtotal, onClose, onRemove }: Props) {
               onClick={() => void checkout()}
               disabled={busy}
               tabIndex={open ? 0 : -1}
-              className="liquid-btn mt-4 w-full bg-[var(--gold)] py-3.5 text-xs font-bold uppercase tracking-[0.14em] text-[var(--ink)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+              className="liquid-btn mt-4 w-full bg-[var(--accent)] py-3.5 text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[var(--accent-fg)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {busy ? "Redirecting to checkout" : `Checkout · $${subtotal}`}
             </button>

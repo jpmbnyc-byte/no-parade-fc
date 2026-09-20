@@ -9,7 +9,7 @@ type Props = {
 
 export function Footer({ onHome, onCollection, onBuild, onHall }: Props) {
   return (
-    <footer className="border-t border-[var(--panel-line)]">
+    <footer className="border-t border-[var(--line)]">
       {/* Shipping and returns. Everything stated here is what the checkout
           actually does: made-to-order, the nine countries the Stripe session
           accepts an address for, and the no-changes-after-checkout rule the
@@ -49,9 +49,9 @@ export function Footer({ onHome, onCollection, onBuild, onHall }: Props) {
         </div>
       </div>
 
-      <div className="mx-auto flex max-w-[1400px] flex-col gap-8 border-t border-[var(--panel-line)] px-6 py-14 sm:flex-row sm:items-start sm:justify-between sm:px-10">
+      <div className="mx-auto flex max-w-[1400px] flex-col gap-8 border-t border-[var(--line)] px-6 py-14 sm:flex-row sm:items-start sm:justify-between sm:px-10">
         <div>
-          <img src="/logo-white.png" alt="No Parade F.C." className="h-6 w-auto" />
+          <img src="/logo.webp" alt="No Parade F.C." width={480} height={42} className="h-5 w-auto" />
           <p className="mt-4 max-w-xs text-xs leading-relaxed text-[var(--muted)]">
             Four legends. Four colors. One shirt. Peace be with you.
           </p>
@@ -59,23 +59,23 @@ export function Footer({ onHome, onCollection, onBuild, onHall }: Props) {
 
         <div className="flex gap-16 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
           <div className="flex flex-col gap-3">
-            <span className="text-[var(--cream)]">Site</span>
-            <button onClick={onHome} className="text-left transition-colors hover:text-[var(--cream)]">
+            <span className="text-[var(--fg)]">Site</span>
+            <button onClick={onHome} className="text-left transition-colors hover:text-[var(--fg)]">
               Home
             </button>
-            <button onClick={onCollection} className="text-left transition-colors hover:text-[var(--cream)]">
+            <button onClick={onCollection} className="text-left transition-colors hover:text-[var(--fg)]">
               Collection
             </button>
-            <button onClick={onBuild} className="text-left transition-colors hover:text-[var(--cream)]">
+            <button onClick={onBuild} className="text-left transition-colors hover:text-[var(--fg)]">
               The Champions
             </button>
-            <button onClick={onHall} className="text-left transition-colors hover:text-[var(--cream)]">
+            <button onClick={onHall} className="text-left transition-colors hover:text-[var(--fg)]">
               Hall of Fame
             </button>
           </div>
         </div>
       </div>
-      <div className="border-t border-[var(--panel-line)] px-6 py-5 text-center text-[0.65rem] uppercase tracking-[0.12em] text-[var(--muted)] sm:px-10">
+      <div className="border-t border-[var(--line)] px-6 py-5 text-center text-[0.65rem] uppercase tracking-[0.12em] text-[var(--muted)] sm:px-10">
         No Parade F.C. — Peace Be With You
       </div>
     </footer>
