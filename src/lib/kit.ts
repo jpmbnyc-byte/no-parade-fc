@@ -203,7 +203,13 @@ export type JerseyLayout = {
 
 export const JERSEY_LAYOUT: JerseyLayout = {
   name: { centerX: 50, y: 18.86, heightPct: 9.36, maxWidthPct: 34, trackingEm: 0.059 },
-  number: { centerX: 50, y: 25.63, heightPct: 35.24, trackingEm: 0.088 },
+  // 0.088 set the digits noticeably wider apart than the tribute print they
+  // are supposed to match. Measured against the baked HENRY 12 plate, the
+  // gap between digits as a fraction of digit height was 0.237 at 0.088
+  // against the print's 0.101; the relationship is linear at ~1.43 per em,
+  // and 0.01 lands at 0.125 — the closest a positive value gets. It stays
+  // positive deliberately: negative tracking would let wide pairs collide.
+  number: { centerX: 50, y: 25.63, heightPct: 35.24, trackingEm: 0.01 },
 };
 
 /**
