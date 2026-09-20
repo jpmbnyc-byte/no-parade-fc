@@ -55,6 +55,22 @@ export function Footer({ onHome, onCollection, onBuild, onHall }: Props) {
           <p className="mt-4 max-w-xs text-xs leading-relaxed text-[var(--muted)]">
             Four legends. Four colors. One shirt. Peace be with you.
           </p>
+          {/* The shop had no way back to the house it belongs to. */}
+          <a
+            href="https://www.noparade.store"
+            className="mt-6 inline-flex items-center gap-3 text-[0.6rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)] transition-colors hover:text-[var(--fg)]"
+          >
+            <img
+              src="/logo-mark.png"
+              alt=""
+              width={1460}
+              height={670}
+              loading="lazy"
+              decoding="async"
+              className="h-4 w-auto"
+            />
+            Part of No Parade
+          </a>
         </div>
 
         <div className="flex gap-16 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
